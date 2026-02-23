@@ -9,17 +9,16 @@ try {
     // Projets en vedette
     $projets = $pdo->query("SELECT * FROM projets WHERE statut = 'actif' ORDER BY priorite ASC LIMIT 6")->fetchAll();
     
-    // Statistiques
-    $stats = $pdo->query("SELECT * FROM statistiques")->fetchAll(PDO::FETCH_KEY_PAIR);
-    $total_donateurs = $stats['total_donateurs'] ?? 0;
-    $total_collecte = $pdo->query("SELECT SUM(montant) FROM dons WHERE statut='complete'")->fetchColumn() ?: 0;
-    $total_projets = $pdo->query("SELECT COUNT(*) FROM projets WHERE statut='actif'")->fetchColumn() ?: 0;
+    // Statistiques temps réel depuis la base de données
+    $total_donateurs = (int)$pdo->query("SELECT COUNT(DISTINCT donateur_email) FROM dons WHERE statut='complete'")->fetchColumn();
+    $total_collecte  = (float)$pdo->query("SELECT COALESCE(SUM(montant),0) FROM dons WHERE statut='complete'")->fetchColumn();
+    $total_projets   = (int)$pdo->query("SELECT COUNT(*) FROM projets WHERE statut='actif'")->fetchColumn();
     
     // Actualités
     $actualites = $pdo->query("SELECT * FROM actualites WHERE statut='publie' ORDER BY created_at DESC LIMIT 3")->fetchAll();
     
     // Témoignages
-    $temoignages = $pdo->query("SELECT * FROM temoignages WHERE actif=1 ORDER BY RAND() LIMIT 6")->fetchAll();
+    $temoignages = $pdo->query("SELECT * FROM temoignages WHERE actif=1 ORDER BY id LIMIT 6")->fetchAll();
     
     // Partenaires
     $partenaires = $pdo->query("SELECT * FROM partenaires WHERE actif=1 ORDER BY ordre ASC")->fetchAll();
@@ -80,7 +79,7 @@ require_once 'includes/header.php';
             </p>
             
             <div class="hero-actions">
-                <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-primary btn-lg">
+                <a href="<?= SITE_URL ?>/don" class="btn btn-primary btn-lg">
                     <i class="fas fa-heart"></i> Faire un Don Maintenant
                 </a>
                 <a href="#projets" class="btn btn-outline-white btn-lg">
@@ -88,25 +87,26 @@ require_once 'includes/header.php';
                 </a>
             </div>
             
-            <!-- Hero Stats -->
+            <!-- Hero Stats (mis à jour dynamiquement via API) -->
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <span class="hero-stat-number" data-count="<?= $total_donateurs ?>" id="stat1">0</span>
+                    <span class="hero-stat-number live-counter" id="heroStatDonateurs"
+                          data-value="<?= $total_donateurs ?>">0</span>
                     <span class="hero-stat-label">Donateurs</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-number" id="stat2">
-                        <?= number_format($total_collecte/1000000, 1, ',', ' ') ?>M
-                    </span>
+                    <span class="hero-stat-number" id="heroStatCollecte"
+                          data-value="<?= $total_collecte ?>">0</span>
                     <span class="hero-stat-label">FCFA Collectés</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-number" data-count="<?= $total_projets ?>" id="stat3">0</span>
-                    <span class="hero-stat-label">Projets</span>
+                    <span class="hero-stat-number live-counter" id="heroStatProjets"
+                          data-value="<?= $total_projets ?>">0</span>
+                    <span class="hero-stat-label">Projets Actifs</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-number">Niger</span>
-                    <span class="hero-stat-label">Impact National</span>
+                    <span class="hero-stat-number">8</span>
+                    <span class="hero-stat-label">Régions couvertes</span>
                 </div>
             </div>
         </div>
@@ -119,17 +119,20 @@ require_once 'includes/header.php';
         <div class="stats-grid">
             <div class="stat-card" data-aos="fade-up" data-aos-delay="0">
                 <div class="stat-icon"><i class="fas fa-users"></i></div>
-                <span class="stat-number" data-count="<?= $total_donateurs ?>">0</span>
+                <span class="stat-number live-counter" id="bandeauDonateurs"
+                      data-value="<?= $total_donateurs ?>">0</span>
                 <span class="stat-label">Donateurs</span>
             </div>
             <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
                 <div class="stat-icon"><i class="fas fa-hand-holding-heart"></i></div>
-                <span class="stat-number" data-count="<?= intval($total_collecte/1000) ?>" data-suffix="K">0K</span>
+                <span class="stat-number" id="bandeauCollecte"
+                      data-value="<?= $total_collecte ?>">0 FCFA</span>
                 <span class="stat-label">FCFA Collectés</span>
             </div>
             <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
                 <div class="stat-icon"><i class="fas fa-project-diagram"></i></div>
-                <span class="stat-number" data-count="<?= $total_projets ?>">0</span>
+                <span class="stat-number live-counter" id="bandeauProjets"
+                      data-value="<?= $total_projets ?>">0</span>
                 <span class="stat-label">Projets Actifs</span>
             </div>
             <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
@@ -200,10 +203,10 @@ require_once 'includes/header.php';
                 </div>
                 
                 <div class="d-flex gap-3">
-                    <a href="<?= SITE_URL ?>/pages/a-propos.php" class="btn btn-secondary">
+                    <a href="<?= SITE_URL ?>/a-propos" class="btn btn-secondary">
                         <i class="fas fa-info-circle"></i> En Savoir Plus
                     </a>
-                    <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-outline-primary">
+                    <a href="<?= SITE_URL ?>/don" class="btn btn-outline-primary">
                         <i class="fas fa-heart"></i> Faire un Don
                     </a>
                 </div>
@@ -255,7 +258,7 @@ require_once 'includes/header.php';
                     </div>
                     <div class="project-footer">
                         <span class="project-meta"><i class="fas fa-target"></i> Objectif : <?= number_format($p['objectif_montant'], 0, ',', ' ') ?> FCFA</span>
-                        <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-primary btn-sm">Soutenir <i class="fas fa-arrow-right"></i></a>
+                        <a href="<?= SITE_URL ?>/don" class="btn btn-primary btn-sm">Soutenir <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -287,7 +290,7 @@ require_once 'includes/header.php';
                     </div>
                     <div class="project-footer">
                         <span class="project-meta"><i class="fas fa-bullseye"></i> <?= number_format($projet['objectif_montant'], 0, ',', ' ') ?> FCFA</span>
-                        <a href="<?= SITE_URL ?>/pages/projet-detail.php?slug=<?= $projet['slug'] ?>" class="btn btn-primary btn-sm">Soutenir <i class="fas fa-arrow-right"></i></a>
+                        <a href="<?= SITE_URL ?>/projets/<?= $projet['slug'] ?>" class="btn btn-primary btn-sm">Soutenir <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -296,7 +299,7 @@ require_once 'includes/header.php';
         </div>
         
         <div class="text-center mt-5" data-aos="fade-up">
-            <a href="<?= SITE_URL ?>/pages/projets.php" class="btn btn-secondary">
+            <a href="<?= SITE_URL ?>/projets" class="btn btn-secondary">
                 <i class="fas fa-th-large"></i> Voir tous les Projets
             </a>
         </div>
@@ -497,7 +500,7 @@ require_once 'includes/header.php';
                 <div class="form-group" style="margin-top:24px;">
                     <label class="checkbox-label" style="font-size:13px; color: var(--gray);">
                         <input type="checkbox" required>
-                        J'accepte les <a href="<?= SITE_URL ?>/pages/conditions-generales.php" style="color:var(--secondary);">conditions générales</a> et la <a href="<?= SITE_URL ?>/pages/politique-confidentialite.php" style="color:var(--secondary);">politique de confidentialité</a>
+                        J'accepte les <a href="<?= SITE_URL ?>/conditions-generales" style="color:var(--secondary);">conditions générales</a> et la <a href="<?= SITE_URL ?>/politique-confidentialite" style="color:var(--secondary);">politique de confidentialité</a>
                     </label>
                 </div>
                 
@@ -565,7 +568,7 @@ require_once 'includes/header.php';
                     <span class="section-tag"><i class="fas fa-newspaper"></i> Actualités</span>
                     <h2 class="section-title">Dernières <span>Nouvelles</span></h2>
                 </div>
-                <a href="<?= SITE_URL ?>/pages/actualites.php" class="btn btn-outline-primary">Toutes les actualités</a>
+                <a href="<?= SITE_URL ?>/actualites" class="btn btn-outline-primary">Toutes les actualités</a>
             </div>
         </div>
         
@@ -585,12 +588,12 @@ require_once 'includes/header.php';
                         <span><i class="fas fa-calendar"></i> <?= date('d/m/Y', strtotime($actu['created_at'])) ?></span>
                     </div>
                     <h3 class="news-title">
-                        <a href="<?= SITE_URL ?>/pages/actualite-detail.php?slug=<?= $actu['slug'] ?>">
+                        <a href="<?= SITE_URL ?>/actualites/<?= $actu['slug'] ?>">
                             <?= sanitize($actu['titre']) ?>
                         </a>
                     </h3>
                     <p class="news-excerpt"><?= sanitize($actu['extrait'] ?? '') ?></p>
-                    <a href="<?= SITE_URL ?>/pages/actualite-detail.php?slug=<?= $actu['slug'] ?>" class="read-more">
+                    <a href="<?= SITE_URL ?>/actualites/<?= $actu['slug'] ?>" class="read-more">
                         Lire la suite <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -607,10 +610,10 @@ require_once 'includes/header.php';
         <h2>Rejoignez le mouvement pour une Justice <br>au service du peuple nigérien</h2>
         <p>Chaque contribution, petite ou grande, contribue à construire un système judiciaire meilleur pour le Niger.</p>
         <div class="d-flex justify-center gap-3">
-            <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-white btn-lg">
+            <a href="<?= SITE_URL ?>/don" class="btn btn-white btn-lg">
                 <i class="fas fa-heart"></i> Faire un Don
             </a>
-            <a href="<?= SITE_URL ?>/pages/contact.php" class="btn btn-outline-white btn-lg">
+            <a href="<?= SITE_URL ?>/contact" class="btn btn-outline-white btn-lg">
                 <i class="fas fa-envelope"></i> Nous Contacter
             </a>
         </div>
@@ -730,4 +733,170 @@ require_once 'includes/header.php';
 }
 </style>
 
+<!-- Script de mise à jour dynamique des compteurs -->
+<script>
+// ═══════════════════════════════════════════════════
+//  COMPTEURS DYNAMIQUES – Mise à jour temps réel
+// ═══════════════════════════════════════════════════
+
+const STATS_API = '<?= SITE_URL ?>/api/stats';
+const REFRESH_INTERVAL = 30000; // 30 secondes
+
+/**
+ * Animation de compteur (0 → valeur cible)
+ */
+function animateCounter(el, targetValue, duration = 1800) {
+    if (!el) return;
+    const start = performance.now();
+    const initial = parseInt(el.textContent.replace(/\D/g,'')) || 0;
+    const diff = targetValue - initial;
+    if (diff === 0) return;
+
+    function step(now) {
+        const elapsed  = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        // Easing ease-out
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(initial + diff * ease);
+        el.textContent = current.toLocaleString('fr-FR');
+        if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+/**
+ * Formater un montant en FCFA (compact : 1 500 000 → 1,5M)
+ */
+function formatMontantCompact(n) {
+    if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.', ',') + ' Md FCFA';
+    if (n >= 1000000)    return (n / 1000000).toFixed(1).replace('.', ',') + 'M FCFA';
+    if (n >= 1000)       return (n / 1000).toFixed(0) + ' K FCFA';
+    return n.toLocaleString('fr-FR') + ' FCFA';
+}
+
+/**
+ * Mettre à jour les compteurs depuis l'API
+ */
+async function updateStats() {
+    try {
+        const resp = await fetch(STATS_API + '?t=' + Date.now());
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (!data.success) return;
+
+        // ── Hero stats ──────────────────────────────────────────────────
+        const heroDon = document.getElementById('heroStatDonateurs');
+        const heroColl = document.getElementById('heroStatCollecte');
+        const heroProj = document.getElementById('heroStatProjets');
+
+        if (heroDon)  animateCounter(heroDon,  data.total_donateurs);
+        if (heroProj) animateCounter(heroProj, data.total_projets);
+        if (heroColl) heroColl.textContent = formatMontantCompact(data.total_collecte);
+
+        // ── Bandeau statistiques ────────────────────────────────────────
+        const banDon  = document.getElementById('bandeauDonateurs');
+        const banColl = document.getElementById('bandeauCollecte');
+        const banProj = document.getElementById('bandeauProjets');
+
+        if (banDon)  animateCounter(banDon,  data.total_donateurs);
+        if (banProj) animateCounter(banProj, data.total_projets);
+        if (banColl) banColl.textContent = formatMontantCompact(data.total_collecte);
+
+        // ── Dernier don (notification live) ────────────────────────────
+        if (data.dernier_don) {
+            showLiveDon(data.dernier_don);
+        }
+
+    } catch (e) {
+        // Silencieux en production
+    }
+}
+
+/**
+ * Afficher une notification "dernier don" en coin de page
+ */
+function showLiveDon(don) {
+    let toast = document.getElementById('liveDonToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'liveDonToast';
+        toast.style.cssText = [
+            'position:fixed','bottom:90px','right:20px','z-index:9999',
+            'background:white','border-radius:12px',
+            'box-shadow:0 8px 30px rgba(0,0,0,.18)',
+            'padding:14px 18px','max-width:280px',
+            'border-left:4px solid #22c55e',
+            'display:flex','align-items:center','gap:12px',
+            'animation:slideInRight .4s ease',
+            'font-family:inherit'
+        ].join(';');
+        document.body.appendChild(toast);
+
+        // Injecter keyframe si nécessaire
+        if (!document.getElementById('liveToastStyle')) {
+            const s = document.createElement('style');
+            s.id = 'liveToastStyle';
+            s.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(120%); opacity:0; }
+                    to   { transform: translateX(0);    opacity:1; }
+                }
+            `;
+            document.head.appendChild(s);
+        }
+    }
+    toast.innerHTML = `
+        <div style="width:38px;height:38px;background:#dcfce7;border-radius:50%;
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="fas fa-heart" style="color:#16a34a;font-size:16px;"></i>
+        </div>
+        <div>
+            <p style="margin:0;font-size:12px;font-weight:700;color:#166534;">Don récent</p>
+            <p style="margin:0;font-size:13px;color:#374151;">
+                <strong>${don.nom}</strong> · <span style="color:#16a34a;font-weight:700;">${don.montant}</span>
+            </p>
+            <p style="margin:0;font-size:11px;color:#9ca3af;">${don.date}</p>
+        </div>
+    `;
+    toast.style.display = 'flex';
+
+    // Masquer après 8 secondes
+    clearTimeout(window._donToastTimer);
+    window._donToastTimer = setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity .5s';
+        setTimeout(() => toast.style.display = 'none', 500);
+    }, 8000);
+}
+
+// ── Initialisation ──────────────────────────────────────────────────────────
+// Animer les valeurs initiales (chargées côté PHP)
+document.addEventListener('DOMContentLoaded', () => {
+    const initCounters = [
+        ['heroStatDonateurs', parseInt('<?= $total_donateurs ?>')],
+        ['heroStatProjets',   parseInt('<?= $total_projets ?>')],
+        ['bandeauDonateurs',  parseInt('<?= $total_donateurs ?>')],
+        ['bandeauProjets',    parseInt('<?= $total_projets ?>')],
+    ];
+    initCounters.forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) animateCounter(el, val);
+    });
+
+    // Montant collecté formaté
+    const collecte = <?= $total_collecte ?>;
+    ['heroStatCollecte','bandeauCollecte'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = formatMontantCompact(collecte);
+    });
+
+    // Rafraîchir toutes les 30 secondes
+    setInterval(updateStats, REFRESH_INTERVAL);
+
+    // Premier appel API après 5 secondes
+    setTimeout(updateStats, 5000);
+});
+</script>
+
 <?php require_once 'includes/footer.php'; ?>
+

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130" font-family="Arial,sans-serif">
+  <!-- Carte recto -->
+  <rect x="5" y="5" width="85" height="55" rx="6" fill="#1B2A4A" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="5" y="30" width="85" height="10" fill="rgba(0,0,0,0.4)"/>
+  <rect x="55" y="43" width="30" height="12" rx="2" fill="white"/>
+  <text x="70" y="53" font-size="9" text-anchor="middle" fill="#1B2A4A" font-weight="bold">CVV</text>
+  <text x="48" y="53" font-size="7" fill="rgba(255,255,255,0.6)">Dos</text>
+  <text x="70" y="70" font-size="8" text-anchor="middle" fill="#6b7280">3 chiffres au dos</text>
+
+  <!-- Séparateur -->
+  <line x1="100" y1="10" x2="100" y2="80" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Carte verso (Amex) -->
+  <rect x="110" y="5" width="85" height="55" rx="6" fill="#2E77BC" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="118" y="15" width="55" height="12" rx="2" fill="white"/>
+  <text x="145" y="25" font-size="9" text-anchor="middle" fill="#2E77BC" font-weight="bold">CVV</text>
+  <text x="145" y="40" font-size="8" text-anchor="middle" fill="rgba(255,255,255,0.7)">Recto</text>
+  <text x="145" y="70" font-size="8" text-anchor="middle" fill="#6b7280">4 chiffres (Amex)</text>
+</svg>

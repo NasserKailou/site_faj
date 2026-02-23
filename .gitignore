@@ -18,3 +18,10 @@ uploads/*
 
 # Config sensible (à déployer manuellement)
 # includes/config.php  # Commenté - à décommenter si besoin
+
+# SQLite locale (développement)
+faj_data.sqlite
+logs/
+*.log
+favicon.ico
+favicon.png
