@@ -2,18 +2,6 @@
 $page_title = 'Nos Projets';
 require_once '../includes/config.php';
 
-function getSiteParam($cle, $default = '') {
-    try {
-        $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT valeur FROM parametres WHERE cle = ?");
-        $stmt->execute([$cle]);
-        $result = $stmt->fetch();
-        return $result ? $result['valeur'] : $default;
-    } catch (Exception $e) {
-        return $default;
-    }
-}
-
 $cat_filter = isset($_GET['cat']) ? sanitize($_GET['cat']) : 'all';
 
 try {

@@ -3,18 +3,6 @@ $page_title = 'Paramètres du site';
 require_once '../includes/config.php';
 requireAdmin();
 
-function getSiteParam($cle, $default = '') {
-    try {
-        $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT valeur FROM parametres WHERE cle = ?");
-        $stmt->execute([$cle]);
-        $result = $stmt->fetch();
-        return $result ? $result['valeur'] : $default;
-    } catch (Exception $e) {
-        return $default;
-    }
-}
-
 $success = '';
 $error = '';
 

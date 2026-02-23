@@ -2,18 +2,6 @@
 $page_title = 'À Propos du FAJ';
 require_once '../includes/config.php';
 
-function getSiteParam($cle, $default = '') {
-    try {
-        $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT valeur FROM parametres WHERE cle = ?");
-        $stmt->execute([$cle]);
-        $result = $stmt->fetch();
-        return $result ? $result['valeur'] : $default;
-    } catch (Exception $e) {
-        return $default;
-    }
-}
-
 try {
     $pdo = getDB();
     $equipe = $pdo->query("SELECT * FROM equipe WHERE actif=1 ORDER BY ordre ASC")->fetchAll();

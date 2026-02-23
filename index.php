@@ -3,18 +3,6 @@ $page_title = 'Accueil';
 require_once 'includes/config.php';
 
 // Récupérer les données
-function getSiteParam($cle, $default = '') {
-    try {
-        $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT valeur FROM parametres WHERE cle = ?");
-        $stmt->execute([$cle]);
-        $result = $stmt->fetch();
-        return $result ? $result['valeur'] : $default;
-    } catch (Exception $e) {
-        return $default;
-    }
-}
-
 try {
     $pdo = getDB();
     

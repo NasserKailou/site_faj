@@ -2,18 +2,6 @@
 $page_title = 'Actualités';
 require_once '../includes/config.php';
 
-function getSiteParam($cle, $default = '') {
-    try {
-        $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT valeur FROM parametres WHERE cle = ?");
-        $stmt->execute([$cle]);
-        $result = $stmt->fetch();
-        return $result ? $result['valeur'] : $default;
-    } catch (Exception $e) {
-        return $default;
-    }
-}
-
 $page = max(1, intval($_GET['p'] ?? 1));
 $per_page = 9;
 $offset = ($page - 1) * $per_page;

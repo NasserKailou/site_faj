@@ -1,19 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
 
-// Récupérer les paramètres du site
-function getSiteParam($cle, $default = '') {
-    try {
-        $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT valeur FROM parametres WHERE cle = ?");
-        $stmt->execute([$cle]);
-        $result = $stmt->fetch();
-        return $result ? $result['valeur'] : $default;
-    } catch (Exception $e) {
-        return $default;
-    }
-}
-
 $site_nom = getSiteParam('site_nom', 'Fonds d\'Appui à la Justice');
 $site_slogan = getSiteParam('site_slogan', 'Ensemble pour une Justice accessible à tous');
 ?>
