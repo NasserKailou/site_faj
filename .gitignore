@@ -1,0 +1,20 @@
+node_modules/
+vendor/
+.env
+*.log
+*.bak
+*.backup
+.wrangler/
+dist/
+.DS_Store
+Thumbs.db
+
+# Don't commit uploads
+uploads/*
+!uploads/.gitkeep
+!uploads/projets/.gitkeep
+!uploads/team/.gitkeep
+!uploads/partenaires/.gitkeep
+
+# Config sensible (à déployer manuellement)
+# includes/config.php  # Commenté - à décommenter si besoin

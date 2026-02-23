@@ -1,0 +1,745 @@
+<?php
+$page_title = 'Accueil';
+require_once 'includes/config.php';
+
+// Récupérer les données
+function getSiteParam($cle, $default = '') {
+    try {
+        $pdo = getDB();
+        $stmt = $pdo->prepare("SELECT valeur FROM parametres WHERE cle = ?");
+        $stmt->execute([$cle]);
+        $result = $stmt->fetch();
+        return $result ? $result['valeur'] : $default;
+    } catch (Exception $e) {
+        return $default;
+    }
+}
+
+try {
+    $pdo = getDB();
+    
+    // Projets en vedette
+    $projets = $pdo->query("SELECT * FROM projets WHERE statut = 'actif' ORDER BY priorite ASC LIMIT 6")->fetchAll();
+    
+    // Statistiques
+    $stats = $pdo->query("SELECT * FROM statistiques")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $total_donateurs = $stats['total_donateurs'] ?? 0;
+    $total_collecte = $pdo->query("SELECT SUM(montant) FROM dons WHERE statut='complete'")->fetchColumn() ?: 0;
+    $total_projets = $pdo->query("SELECT COUNT(*) FROM projets WHERE statut='actif'")->fetchColumn() ?: 0;
+    
+    // Actualités
+    $actualites = $pdo->query("SELECT * FROM actualites WHERE statut='publie' ORDER BY created_at DESC LIMIT 3")->fetchAll();
+    
+    // Témoignages
+    $temoignages = $pdo->query("SELECT * FROM temoignages WHERE actif=1 ORDER BY RAND() LIMIT 6")->fetchAll();
+    
+    // Partenaires
+    $partenaires = $pdo->query("SELECT * FROM partenaires WHERE actif=1 ORDER BY ordre ASC")->fetchAll();
+
+} catch (Exception $e) {
+    $projets = []; $actualites = []; $temoignages = []; $partenaires = [];
+    $total_donateurs = 0; $total_collecte = 0; $total_projets = 0;
+}
+
+require_once 'includes/header.php';
+?>
+
+<!-- LOADER -->
+<div class="loader-overlay" id="loaderOverlay">
+    <div class="loader">
+        <img src="<?= SITE_URL ?>/assets/images/logo-faj.png" alt="FAJ">
+        <p>Chargement...</p>
+    </div>
+</div>
+
+<!-- ===== HERO SECTION ===== -->
+<section class="hero">
+    <!-- Background Slider -->
+    <div class="hero-slider">
+        <div class="hero-slide active">
+            <img src="<?= SITE_URL ?>/assets/images/hero-collecte.jpg" alt="Collecte de fonds">
+        </div>
+        <div class="hero-slide">
+            <img src="<?= SITE_URL ?>/assets/images/hero-croissance.jpg" alt="Croissance">
+        </div>
+        <div class="hero-slide">
+            <img src="<?= SITE_URL ?>/assets/images/hero-billets.jpg" alt="Financement">
+        </div>
+    </div>
+    <div class="hero-overlay"></div>
+    
+    <!-- Slider dots -->
+    <div class="hero-controls">
+        <span class="hero-dot active"></span>
+        <span class="hero-dot"></span>
+        <span class="hero-dot"></span>
+    </div>
+    
+    <!-- Content -->
+    <div class="hero-content container">
+        <div class="hero-inner" data-aos="fade-right">
+            <div class="hero-badge">
+                <i class="fas fa-balance-scale"></i>
+                <span>Fonds d'Appui à la Justice du Niger</span>
+            </div>
+            
+            <h1 class="hero-title">
+                <?= getSiteParam('hero_titre', 'Votre don peut <span>changer des vies</span>') ?>
+            </h1>
+            
+            <p class="hero-desc">
+                <?= getSiteParam('hero_sous_titre', 'Participez à la modernisation du système judiciaire du Niger. Ensemble, nous pouvons garantir une justice accessible, équitable et transparente pour tous.') ?>
+            </p>
+            
+            <div class="hero-actions">
+                <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-primary btn-lg">
+                    <i class="fas fa-heart"></i> Faire un Don Maintenant
+                </a>
+                <a href="#projets" class="btn btn-outline-white btn-lg">
+                    <i class="fas fa-project-diagram"></i> Voir nos Projets
+                </a>
+            </div>
+            
+            <!-- Hero Stats -->
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number" data-count="<?= $total_donateurs ?>" id="stat1">0</span>
+                    <span class="hero-stat-label">Donateurs</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number" id="stat2">
+                        <?= number_format($total_collecte/1000000, 1, ',', ' ') ?>M
+                    </span>
+                    <span class="hero-stat-label">FCFA Collectés</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number" data-count="<?= $total_projets ?>" id="stat3">0</span>
+                    <span class="hero-stat-label">Projets</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">Niger</span>
+                    <span class="hero-stat-label">Impact National</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== STATS SECTION ===== -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <span class="stat-number" data-count="<?= $total_donateurs ?>">0</span>
+                <span class="stat-label">Donateurs</span>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                <span class="stat-number" data-count="<?= intval($total_collecte/1000) ?>" data-suffix="K">0K</span>
+                <span class="stat-label">FCFA Collectés</span>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-icon"><i class="fas fa-project-diagram"></i></div>
+                <span class="stat-number" data-count="<?= $total_projets ?>">0</span>
+                <span class="stat-label">Projets Actifs</span>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-icon"><i class="fas fa-balance-scale"></i></div>
+                <span class="stat-number" data-count="8">0</span>
+                <span class="stat-label">Régions Couvertes</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== À PROPOS ===== -->
+<section class="about-section">
+    <div class="container">
+        <div class="about-grid">
+            <!-- Image -->
+            <div class="about-image" data-aos="fade-right">
+                <div class="about-img-main">
+                    <img src="<?= SITE_URL ?>/assets/images/hero-collecte.jpg" alt="À propos du FAJ">
+                </div>
+                <div class="about-img-badge">
+                    <strong><?= date('Y') - 2023 ?>+</strong>
+                    <span>Années d'engagement</span>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="about-content" data-aos="fade-left">
+                <span class="section-tag">
+                    <i class="fas fa-balance-scale"></i> À Propos du FAJ
+                </span>
+                <h2 class="section-title">
+                    <?= getSiteParam('a_propos_titre', 'Pour une Justice <span>Accessible à Tous</span>') ?>
+                </h2>
+                <div class="section-text mb-4">
+                    <?= getSiteParam('a_propos_texte', '<p>Le Fonds d\'Appui à la Justice (FAJ) est un mécanisme de financement innovant créé pour soutenir la modernisation et l\'amélioration du système judiciaire du Niger. Notre mission : garantir que la justice soit réellement indépendante, accessible et au service de tous les citoyens nigériens.</p><p>À l\'horizon 2035, notre ambition est d\'assurer un meilleur accès à la justice et un système carcéral modernisé à travers la mobilisation citoyenne et la collecte de fonds.</p>') ?>
+                </div>
+                
+                <div class="about-features">
+                    <div class="about-feature">
+                        <div class="about-feature-icon"><i class="fas fa-building-columns"></i></div>
+                        <div class="about-feature-text">
+                            <h6>Infrastructures</h6>
+                            <p>Construction et équipement de tribunaux</p>
+                        </div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon"><i class="fas fa-graduation-cap"></i></div>
+                        <div class="about-feature-text">
+                            <h6>Formation</h6>
+                            <p>Renforcement des capacités judiciaires</p>
+                        </div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon"><i class="fas fa-hands-helping"></i></div>
+                        <div class="about-feature-text">
+                            <h6>Accès à la Justice</h6>
+                            <p>Aide juridictionnelle pour les vulnérables</p>
+                        </div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon"><i class="fas fa-laptop-code"></i></div>
+                        <div class="about-feature-text">
+                            <h6>Numérisation</h6>
+                            <p>Modernisation digitale du système</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-3">
+                    <a href="<?= SITE_URL ?>/pages/a-propos.php" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i> En Savoir Plus
+                    </a>
+                    <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-outline-primary">
+                        <i class="fas fa-heart"></i> Faire un Don
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PROJETS ===== -->
+<section class="projects-section" id="projets">
+    <div class="container">
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-project-diagram"></i> Nos Projets</span>
+            <h2 class="section-title">Projets que <span>Nous Finançons</span></h2>
+            <p class="section-subtitle">Découvrez nos programmes en cours pour améliorer le système judiciaire du Niger</p>
+        </div>
+        
+        <div class="projects-grid">
+            <?php if (empty($projets)): ?>
+            <!-- Projets par défaut si BD vide -->
+            <?php
+            $projets_defaut = [
+                ['titre' => 'Construction et Équipement de Tribunaux', 'description_courte' => 'Financement de la construction et de l\'équipement des tribunaux dans les régions du Niger', 'categorie' => 'infrastructure', 'objectif_montant' => 150000000, 'montant_collecte' => 45000000, 'image' => 'hero-collecte.jpg'],
+                ['titre' => 'Formation des Acteurs Judiciaires', 'description_courte' => 'Renforcement des capacités des magistrats, avocats et auxiliaires de justice', 'categorie' => 'formation', 'objectif_montant' => 80000000, 'montant_collecte' => 20000000, 'image' => 'hero-croissance.jpg'],
+                ['titre' => 'Humanisation du Milieu Carcéral', 'description_courte' => 'Amélioration des conditions de détention et réinsertion sociale des détenus', 'categorie' => 'humanisation', 'objectif_montant' => 100000000, 'montant_collecte' => 35000000, 'image' => 'hero-billets.jpg'],
+                ['titre' => 'Accès à la Justice pour les Vulnérables', 'description_courte' => 'Aide juridictionnelle gratuite pour les personnes démunies', 'categorie' => 'acces_justice', 'objectif_montant' => 60000000, 'montant_collecte' => 18000000, 'image' => 'hero-collecte.jpg'],
+                ['titre' => 'Numérisation du Système Judiciaire', 'description_courte' => 'Modernisation et digitalisation des archives et procédures judiciaires', 'categorie' => 'numerisation', 'objectif_montant' => 120000000, 'montant_collecte' => 30000000, 'image' => 'hero-croissance.jpg'],
+                ['titre' => 'Aide aux Détenus en Attente de Jugement', 'description_courte' => 'Programme d\'assistance pour les personnes en détention préventive prolongée', 'categorie' => 'acces_justice', 'objectif_montant' => 40000000, 'montant_collecte' => 12000000, 'image' => 'hero-billets.jpg'],
+            ];
+            foreach ($projets_defaut as $p): 
+                $pct = $p['objectif_montant'] > 0 ? min(100, round($p['montant_collecte']/$p['objectif_montant']*100)) : 0;
+            ?>
+            <div class="project-card" data-aos="fade-up">
+                <div class="project-img">
+                    <img src="<?= SITE_URL ?>/assets/images/<?= $p['image'] ?>" alt="<?= $p['titre'] ?>">
+                    <span class="project-cat-badge"><?= ucfirst(str_replace('_', ' ', $p['categorie'])) ?></span>
+                </div>
+                <div class="project-body">
+                    <h3 class="project-title"><?= $p['titre'] ?></h3>
+                    <p class="project-desc"><?= $p['description_courte'] ?></p>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" data-width="<?= $pct ?>%" style="width: <?= $pct ?>%"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span class="progress-percent"><?= $pct ?>% financé</span>
+                            <span class="progress-amount"><?= number_format($p['montant_collecte'], 0, ',', ' ') ?> / <?= number_format($p['objectif_montant'], 0, ',', ' ') ?> FCFA</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <span class="project-meta"><i class="fas fa-target"></i> Objectif : <?= number_format($p['objectif_montant'], 0, ',', ' ') ?> FCFA</span>
+                        <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-primary btn-sm">Soutenir <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php else: ?>
+            <?php foreach ($projets as $projet):
+                $pct = $projet['objectif_montant'] > 0 ? min(100, round($projet['montant_collecte']/$projet['objectif_montant']*100)) : 0;
+            ?>
+            <div class="project-card" data-aos="fade-up">
+                <div class="project-img">
+                    <?php if ($projet['image']): ?>
+                    <img src="<?= UPLOADS_URL ?>/projets/<?= $projet['image'] ?>" alt="<?= $projet['titre'] ?>">
+                    <?php else: ?>
+                    <img src="<?= SITE_URL ?>/assets/images/hero-collecte.jpg" alt="<?= $projet['titre'] ?>">
+                    <?php endif; ?>
+                    <span class="project-cat-badge"><?= ucfirst(str_replace('_', ' ', $projet['categorie'])) ?></span>
+                </div>
+                <div class="project-body">
+                    <h3 class="project-title"><?= sanitize($projet['titre']) ?></h3>
+                    <p class="project-desc"><?= sanitize($projet['description_courte']) ?></p>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" data-width="<?= $pct ?>%" style="width: <?= $pct ?>%"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span class="progress-percent"><?= $pct ?>% financé</span>
+                            <span class="progress-amount"><?= number_format($projet['montant_collecte'], 0, ',', ' ') ?> FCFA</span>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <span class="project-meta"><i class="fas fa-bullseye"></i> <?= number_format($projet['objectif_montant'], 0, ',', ' ') ?> FCFA</span>
+                        <a href="<?= SITE_URL ?>/pages/projet-detail.php?slug=<?= $projet['slug'] ?>" class="btn btn-primary btn-sm">Soutenir <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="<?= SITE_URL ?>/pages/projets.php" class="btn btn-secondary">
+                <i class="fas fa-th-large"></i> Voir tous les Projets
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== COMMENT ÇA MARCHE ===== -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-info-circle"></i> Comment ça marche</span>
+            <h2 class="section-title">Faire un Don en <span>4 Étapes Simples</span></h2>
+            <p class="section-subtitle">Un processus simple et sécurisé pour contribuer à la justice au Niger</p>
+        </div>
+        
+        <div class="steps-grid">
+            <div class="step-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="step-number">1</div>
+                <h4 class="step-title">Choisissez un Projet</h4>
+                <p class="step-desc">Parcourez nos projets et sélectionnez celui que vous souhaitez soutenir ou faites un don général.</p>
+            </div>
+            <div class="step-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="step-number">2</div>
+                <h4 class="step-title">Définissez le Montant</h4>
+                <p class="step-desc">Choisissez le montant de votre contribution. Chaque FCFA compte pour améliorer la justice.</p>
+            </div>
+            <div class="step-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="step-number">3</div>
+                <h4 class="step-title">Mode de Paiement</h4>
+                <p class="step-desc">Orange Money, Moov Money, Carte Visa/Mastercard — choisissez votre méthode préférée.</p>
+            </div>
+            <div class="step-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="step-number">4</div>
+                <h4 class="step-title">Confirmez le Don</h4>
+                <p class="step-desc">Recevez votre reçu par email et suivez l'impact de votre contribution sur nos projets.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FAIRE UN DON ===== -->
+<section class="don-section" id="don">
+    <div class="container">
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-heart"></i> Contribuer</span>
+            <h2 class="section-title">Faites un <span style="color:var(--secondary-light)">Don Maintenant</span></h2>
+            <p class="section-subtitle">Votre contribution finance directement les projets de modernisation de la justice au Niger</p>
+        </div>
+        
+        <div class="don-form-container" data-aos="fade-up">
+            <form id="donForm" method="POST">
+                <input type="hidden" name="methode_paiement" id="methode_paiement" value="">
+                
+                <!-- Étape 1: Montant -->
+                <div class="form-step">
+                    <h3 class="form-step-title"><span class="step-badge">1</span> Choisissez un montant</h3>
+                    
+                    <div class="amount-presets">
+                        <button type="button" class="amount-btn" data-amount="1000">1 000 FCFA</button>
+                        <button type="button" class="amount-btn" data-amount="5000">5 000 FCFA</button>
+                        <button type="button" class="amount-btn selected" data-amount="10000">10 000 FCFA</button>
+                        <button type="button" class="amount-btn" data-amount="25000">25 000 FCFA</button>
+                        <button type="button" class="amount-btn" data-amount="50000">50 000 FCFA</button>
+                        <button type="button" class="amount-btn" data-amount="100000">100 000 FCFA</button>
+                        <button type="button" class="amount-btn" data-amount="500000">500 000 FCFA</button>
+                        <button type="button" class="amount-btn" data-amount="0">Autre</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="montant">Montant personnalisé (FCFA) <span class="required">*</span></label>
+                        <input type="number" id="montant" name="montant" class="form-control" 
+                               placeholder="Ex: 15000" value="10000" min="500" required data-amount-format>
+                    </div>
+                </div>
+                
+                <hr style="margin: 30px 0; border-color: var(--light-gray);">
+                
+                <!-- Étape 2: Informations -->
+                <div class="form-step">
+                    <h3 class="form-step-title"><span class="step-badge">2</span> Vos informations</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="donateur_nom">Nom complet <span class="required">*</span></label>
+                            <input type="text" id="donateur_nom" name="donateur_nom" class="form-control" 
+                                   placeholder="Votre nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="donateur_email">Email <span class="required">*</span></label>
+                            <input type="email" id="donateur_email" name="donateur_email" class="form-control" 
+                                   placeholder="votre@email.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="donateur_telephone">Téléphone</label>
+                            <input type="tel" id="donateur_telephone" name="donateur_telephone" class="form-control" 
+                                   placeholder="+227 XX XX XX XX">
+                        </div>
+                        <div class="form-group">
+                            <label for="donateur_pays">Pays</label>
+                            <select id="donateur_pays" name="donateur_pays" class="form-control">
+                                <option value="Niger" selected>Niger</option>
+                                <option value="Sénégal">Sénégal</option>
+                                <option value="Mali">Mali</option>
+                                <option value="Burkina Faso">Burkina Faso</option>
+                                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                                <option value="France">France</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message (optionnel)</label>
+                        <textarea id="message" name="message" class="form-control" rows="2" 
+                                  placeholder="Votre message de soutien..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="anonyme" id="anonyme"> 
+                            Faire ce don anonymement
+                        </label>
+                    </div>
+                </div>
+                
+                <hr style="margin: 30px 0; border-color: var(--light-gray);">
+                
+                <!-- Étape 3: Moyen de paiement -->
+                <div class="form-step">
+                    <h3 class="form-step-title"><span class="step-badge">3</span> Mode de paiement</h3>
+                    
+                    <div class="payment-methods-grid">
+                        <button type="button" class="payment-method-btn orange" data-method="orange_money">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Orange Money</span>
+                        </button>
+                        <button type="button" class="payment-method-btn moov" data-method="moov_money">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Moov Money</span>
+                        </button>
+                        <button type="button" class="payment-method-btn visa" data-method="carte_visa">
+                            <i class="fab fa-cc-visa"></i>
+                            <span>Carte Visa</span>
+                        </button>
+                        <button type="button" class="payment-method-btn mastercard" data-method="carte_mastercard">
+                            <i class="fab fa-cc-mastercard"></i>
+                            <span>Mastercard</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Panneaux de détail paiement -->
+                    <div id="panel-orange_money" class="payment-detail-panel" style="display:none; margin-top:20px;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Vous serez redirigé vers la page Orange Money pour finaliser votre paiement sécurisé.</span>
+                        </div>
+                    </div>
+                    
+                    <div id="panel-moov_money" class="payment-detail-panel" style="display:none; margin-top:20px;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Vous serez redirigé vers la page Moov Money pour finaliser votre paiement sécurisé.</span>
+                        </div>
+                    </div>
+                    
+                    <div id="panel-carte_visa" class="payment-detail-panel" style="display:none; margin-top:20px;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-lock"></i>
+                            <span>Paiement sécurisé SSL. Vous serez redirigé vers notre plateforme de paiement sécurisée.</span>
+                        </div>
+                    </div>
+                    
+                    <div id="panel-carte_mastercard" class="payment-detail-panel" style="display:none; margin-top:20px;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-lock"></i>
+                            <span>Paiement sécurisé SSL via Mastercard. Redirection vers la plateforme sécurisée.</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr style="margin: 30px 0; border-color: var(--light-gray);">
+                
+                <!-- Résumé -->
+                <div class="don-summary">
+                    <div class="summary-row">
+                        <span>Montant du don :</span>
+                        <strong id="summaryMontant" class="text-secondary">10 000 FCFA</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Mode de paiement :</span>
+                        <span id="summaryMethode" class="text-gray">—</span>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top:24px;">
+                    <label class="checkbox-label" style="font-size:13px; color: var(--gray);">
+                        <input type="checkbox" required>
+                        J'accepte les <a href="<?= SITE_URL ?>/pages/conditions-generales.php" style="color:var(--secondary);">conditions générales</a> et la <a href="<?= SITE_URL ?>/pages/politique-confidentialite.php" style="color:var(--secondary);">politique de confidentialité</a>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%; justify-content:center; font-size:17px; padding:18px;">
+                    <i class="fas fa-lock"></i> Valider Mon Don
+                </button>
+                
+                <p class="text-center text-gray" style="font-size:13px; margin-top:16px;">
+                    <i class="fas fa-shield-alt" style="color:var(--secondary);"></i>
+                    Paiement 100% sécurisé · Reçu envoyé par email
+                </p>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ===== TÉMOIGNAGES ===== -->
+<?php if (!empty($temoignages)): ?>
+<section class="testimonials-section">
+    <div class="container">
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-quote-left"></i> Témoignages</span>
+            <h2 class="section-title">Ce que disent <span>nos Donateurs</span></h2>
+        </div>
+        
+        <div class="swiper testimonials-slider">
+            <div class="swiper-wrapper">
+                <?php foreach ($temoignages as $t): ?>
+                <div class="swiper-slide">
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">
+                            <?php for($i=0; $i<$t['note']; $i++): ?><i class="fas fa-star"></i><?php endfor; ?>
+                        </div>
+                        <p class="testimonial-text"><?= sanitize($t['contenu']) ?></p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">
+                                <?php if ($t['photo']): ?>
+                                <img src="<?= UPLOADS_URL ?>/team/<?= $t['photo'] ?>" alt="<?= $t['nom'] ?>">
+                                <?php else: ?>
+                                <?= strtoupper(substr($t['nom'], 0, 1)) ?>
+                                <?php endif; ?>
+                            </div>
+                            <div>
+                                <div class="testimonial-name"><?= sanitize($t['nom']) ?></div>
+                                <div class="testimonial-role"><?= sanitize($t['poste']) ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- ===== ACTUALITÉS ===== -->
+<?php if (!empty($actualites)): ?>
+<section class="news-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <div class="d-flex justify-between align-center">
+                <div>
+                    <span class="section-tag"><i class="fas fa-newspaper"></i> Actualités</span>
+                    <h2 class="section-title">Dernières <span>Nouvelles</span></h2>
+                </div>
+                <a href="<?= SITE_URL ?>/pages/actualites.php" class="btn btn-outline-primary">Toutes les actualités</a>
+            </div>
+        </div>
+        
+        <div class="news-grid">
+            <?php foreach ($actualites as $actu): ?>
+            <article class="news-card" data-aos="fade-up">
+                <div class="news-img">
+                    <?php if ($actu['image']): ?>
+                    <img src="<?= UPLOADS_URL ?>/actualites/<?= $actu['image'] ?>" alt="<?= $actu['titre'] ?>">
+                    <?php else: ?>
+                    <img src="<?= SITE_URL ?>/assets/images/hero-collecte.jpg" alt="<?= $actu['titre'] ?>">
+                    <?php endif; ?>
+                </div>
+                <div class="news-body">
+                    <span class="news-cat"><?= $actu['categorie'] ?? 'Actualité' ?></span>
+                    <div class="news-meta">
+                        <span><i class="fas fa-calendar"></i> <?= date('d/m/Y', strtotime($actu['created_at'])) ?></span>
+                    </div>
+                    <h3 class="news-title">
+                        <a href="<?= SITE_URL ?>/pages/actualite-detail.php?slug=<?= $actu['slug'] ?>">
+                            <?= sanitize($actu['titre']) ?>
+                        </a>
+                    </h3>
+                    <p class="news-excerpt"><?= sanitize($actu['extrait'] ?? '') ?></p>
+                    <a href="<?= SITE_URL ?>/pages/actualite-detail.php?slug=<?= $actu['slug'] ?>" class="read-more">
+                        Lire la suite <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- ===== CTA BAND ===== -->
+<section class="cta-band">
+    <div class="container" data-aos="fade-up">
+        <h2>Rejoignez le mouvement pour une Justice <br>au service du peuple nigérien</h2>
+        <p>Chaque contribution, petite ou grande, contribue à construire un système judiciaire meilleur pour le Niger.</p>
+        <div class="d-flex justify-center gap-3">
+            <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-white btn-lg">
+                <i class="fas fa-heart"></i> Faire un Don
+            </a>
+            <a href="<?= SITE_URL ?>/pages/contact.php" class="btn btn-outline-white btn-lg">
+                <i class="fas fa-envelope"></i> Nous Contacter
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PARTENAIRES ===== -->
+<section class="partners-section">
+    <div class="container">
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-handshake"></i> Partenaires</span>
+            <h2 class="section-title">Nos <span>Partenaires</span></h2>
+        </div>
+        
+        <div class="partners-track">
+            <?php if (!empty($partenaires)): ?>
+            <?php foreach ($partenaires as $p): ?>
+            <div class="partner-item" data-aos="fade-up">
+                <img src="<?= UPLOADS_URL ?>/partenaires/<?= $p['logo'] ?>" alt="<?= $p['nom'] ?>">
+            </div>
+            <?php endforeach; ?>
+            <?php else: ?>
+            <!-- Partenaires par défaut -->
+            <?php 
+            $partenaires_defaut = ['Ministère de la Justice', 'PNUD Niger', 'Union Européenne', 'Banque Mondiale', 'ONU Droits de l\'Homme'];
+            foreach ($partenaires_defaut as $p): ?>
+            <div class="partner-item" data-aos="fade-up">
+                <div style="background:var(--light); padding:15px 25px; border-radius:8px; font-weight:700; color:var(--primary); font-size:13px; text-align:center; min-width:150px;">
+                    <?= $p ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
+
+<!-- Modal succès don -->
+<div class="modal-overlay" id="donSuccessModal">
+    <div class="modal">
+        <div class="modal-icon"><i class="fas fa-check"></i></div>
+        <h3>Don Confirmé !</h3>
+        <p>Merci pour votre généreux don. Votre référence : <strong id="successRef"></strong><br>
+           Montant : <strong id="successMontant"></strong><br>
+           Un reçu vous a été envoyé par email.</p>
+        <a href="<?= SITE_URL ?>" class="btn btn-primary" data-modal-close>
+            <i class="fas fa-home"></i> Retour à l'Accueil
+        </a>
+    </div>
+</div>
+
+<style>
+.form-step-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.step-badge {
+    width: 32px;
+    height: 32px;
+    background: var(--secondary);
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.don-summary {
+    background: var(--light);
+    border-radius: var(--radius);
+    padding: 20px;
+}
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--light-gray);
+    font-size: 15px;
+}
+.summary-row:last-child { border-bottom: none; }
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--gray);
+}
+.checkbox-label input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--secondary);
+}
+
+/* Swiper custom */
+.swiper-pagination-bullet-active {
+    background: var(--secondary) !important;
+}
+
+/* Mobile overlay */
+@media (max-width: 768px) {
+    body.menu-open::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 998;
+    }
+}
+</style>
+
+<?php require_once 'includes/footer.php'; ?>
