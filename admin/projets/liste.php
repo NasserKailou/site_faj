@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
                 if (in_array($ext, ['jpg','jpeg','png','webp'])) {
                     $filename = 'projet_' . time() . '.' . $ext;
+                    if (!is_dir(UPLOADS_PATH . '/projets')) mkdir(UPLOADS_PATH . '/projets', 0755, true);
                     move_uploaded_file($_FILES['image']['tmp_name'], UPLOADS_PATH . '/projets/' . $filename);
                     $image = $filename;
                 }

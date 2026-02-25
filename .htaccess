@@ -28,56 +28,69 @@ ServerSignature Off
     RewriteCond %{REQUEST_URI} \.\./ [NC]
     RewriteRule .* - [F,L]
 
-    # ── 5. Servir les fichiers statiques réels (CSS, JS, images, uploads) ─
-    # SAUF les dossiers admin/ et pages/ → laisser les routes s'en occuper
+    # ── 5. Servir les assets statiques admin (CSS, JS uniquement) ─────────
+    # Permet admin/assets/css/admin.css, admin/assets/js/*.js, etc.
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_URI} ^.*/admin/assets/
+    RewriteRule ^ - [L]
+
+    # ── 6. Servir les fichiers statiques publics (CSS, JS, images, uploads)─
+    # SAUF tout ce qui est dans admin/ ou pages/ (géré par les routes)
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteCond %{REQUEST_URI} !^.*/admin/
     RewriteCond %{REQUEST_URI} !^.*/pages/
     RewriteRule ^ - [L]
 
-    # ── 6. Routes Admin (sous-pages avec paramètres — AVANT les routes générales) ─
-    RewriteRule ^admin/dons/detail$            admin/dons/detail.php        [L,QSA]
-    RewriteRule ^admin/dons/export$            admin/dons/export.php        [L,QSA]
+    # ── 7. Routes Admin — sous-pages avec paramètres ──────────────────────
+    RewriteRule ^admin/dons/detail/?$            admin/dons/detail.php        [L,QSA]
+    RewriteRule ^admin/dons/export/?$            admin/dons/export.php        [L,QSA]
 
-    # ── 7. Routes Admin (listes) ──────────────────────────────────────────
-    RewriteRule ^admin/?$                      admin/index.php              [L,QSA]
-    RewriteRule ^admin/login$                  admin/login.php              [L,QSA]
-    RewriteRule ^admin/logout$                 admin/logout.php             [L,QSA]
-    RewriteRule ^admin/dashboard$              admin/dashboard.php          [L,QSA]
-    RewriteRule ^admin/parametres$             admin/parametres.php         [L,QSA]
-    RewriteRule ^admin/dons/?$                 admin/dons/liste.php         [L,QSA]
-    RewriteRule ^admin/projets/?$              admin/projets/liste.php      [L,QSA]
-    RewriteRule ^admin/actualites/?$           admin/actualites/liste.php   [L,QSA]
-    RewriteRule ^admin/equipe/?$               admin/equipe/liste.php       [L,QSA]
-    RewriteRule ^admin/temoignages/?$          admin/temoignages/liste.php  [L,QSA]
-    RewriteRule ^admin/partenaires/?$          admin/partenaires/liste.php  [L,QSA]
-    RewriteRule ^admin/contacts/?$             admin/contacts/liste.php     [L,QSA]
-    RewriteRule ^admin/newsletter/?$           admin/newsletter/liste.php   [L,QSA]
-    RewriteRule ^admin/admins/?$               admin/admins/liste.php       [L,QSA]
+    # ── 8. Routes Admin — listes (DOIVENT passer avant la vérif répertoire)─
+    RewriteRule ^admin/?$                        admin/index.php              [L,QSA]
+    RewriteRule ^admin/login/?$                  admin/login.php              [L,QSA]
+    RewriteRule ^admin/logout/?$                 admin/logout.php             [L,QSA]
+    RewriteRule ^admin/dashboard/?$              admin/dashboard.php          [L,QSA]
+    RewriteRule ^admin/parametres/?$             admin/parametres.php         [L,QSA]
+    RewriteRule ^admin/dons/?$                   admin/dons/liste.php         [L,QSA]
+    RewriteRule ^admin/projets/?$                admin/projets/liste.php      [L,QSA]
+    RewriteRule ^admin/actualites/?$             admin/actualites/liste.php   [L,QSA]
+    RewriteRule ^admin/equipe/?$                 admin/equipe/liste.php       [L,QSA]
+    RewriteRule ^admin/temoignages/?$            admin/temoignages/liste.php  [L,QSA]
+    RewriteRule ^admin/partenaires/?$            admin/partenaires/liste.php  [L,QSA]
+    RewriteRule ^admin/contacts/?$               admin/contacts/liste.php     [L,QSA]
+    RewriteRule ^admin/newsletter/?$             admin/newsletter/liste.php   [L,QSA]
+    RewriteRule ^admin/admins/?$                 admin/admins/liste.php       [L,QSA]
 
-    # ── 8. Routes pages publiques ─────────────────────────────────────────
-    RewriteRule ^$                             index.php                        [L,QSA]
-    RewriteRule ^a-propos$                     pages/a-propos.php               [L,QSA]
-    RewriteRule ^projets$                      pages/projets.php                [L,QSA]
-    RewriteRule ^actualites$                   pages/actualites.php             [L,QSA]
-    RewriteRule ^contact$                      pages/contact.php                [L,QSA]
-    RewriteRule ^don$                          pages/don.php                    [L,QSA]
-    RewriteRule ^equipe$                       pages/equipe.php                 [L,QSA]
-    RewriteRule ^don-succes$                   pages/don-succes.php             [L,QSA]
-    RewriteRule ^don-annule$                   pages/don-annule.php             [L,QSA]
-    RewriteRule ^conditions-generales$         pages/conditions-generales.php   [L,QSA]
-    RewriteRule ^politique-confidentialite$    pages/politique-confidentialite.php [L,QSA]
-    RewriteRule ^mentions-legales$             pages/mentions-legales.php       [L,QSA]
-    RewriteRule ^faq$                          pages/faq.php                    [L,QSA]
+    # ── 9. Routes pages publiques ─────────────────────────────────────────
+    RewriteRule ^$                               index.php                           [L,QSA]
+    RewriteRule ^a-propos/?$                     pages/a-propos.php                  [L,QSA]
+    RewriteRule ^projets/?$                      pages/projets.php                   [L,QSA]
+    RewriteRule ^actualites/?$                   pages/actualites.php                [L,QSA]
+    RewriteRule ^contact/?$                      pages/contact.php                   [L,QSA]
+    RewriteRule ^don/?$                          pages/don.php                       [L,QSA]
+    RewriteRule ^equipe/?$                       pages/equipe.php                    [L,QSA]
+    RewriteRule ^don-succes/?$                   pages/don-succes.php                [L,QSA]
+    RewriteRule ^don-annule/?$                   pages/don-annule.php                [L,QSA]
+    RewriteRule ^conditions-generales/?$         pages/conditions-generales.php      [L,QSA]
+    RewriteRule ^politique-confidentialite/?$    pages/politique-confidentialite.php [L,QSA]
+    RewriteRule ^mentions-legales/?$             pages/mentions-legales.php          [L,QSA]
+    RewriteRule ^faq/?$                          pages/faq.php                       [L,QSA]
 
-    # ── 9. Routes avec slug dynamique ─────────────────────────────────────
-    RewriteRule ^projets/([a-z0-9-]+)$         pages/projet-detail.php?slug=$1  [L,QSA]
-    RewriteRule ^actualites/([a-z0-9-]+)$      pages/actualite-detail.php?slug=$1 [L,QSA]
+    # ── 10. Routes avec slug dynamique ────────────────────────────────────
+    RewriteRule ^projets/([a-z0-9-]+)/?$         pages/projet-detail.php?slug=$1    [L,QSA]
+    RewriteRule ^actualites/([a-z0-9-]+)/?$      pages/actualite-detail.php?slug=$1 [L,QSA]
 
-    # ── 10. Tout le reste : fichiers/dossiers existants (assets, api) ─────
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
+    # ── 11. Routes API (garder les .php pour les appels AJAX) ─────────────
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_URI} ^.*/api/
     RewriteRule ^ - [L]
+
+    # ── 12. Tout le reste : fichiers physiques réels (fallback) ───────────
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # IMPORTANT : On NE sert PAS les répertoires physiques (cela causerait des 403)
+    # Les dossiers admin/projets/, admin/equipe/ etc. sont tous gérés par les routes ci-dessus
 
 </IfModule>
 

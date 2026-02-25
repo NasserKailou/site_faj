@@ -9,11 +9,16 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Don't commit uploads
+# Don't commit uploads (fichiers uploadés par les utilisateurs)
 uploads/*
 !uploads/.gitkeep
+!uploads/projets/
 !uploads/projets/.gitkeep
-!uploads/team/.gitkeep
+!uploads/actualites/
+!uploads/actualites/.gitkeep
+!uploads/equipe/
+!uploads/equipe/.gitkeep
+!uploads/partenaires/
 !uploads/partenaires/.gitkeep
 
 # Config sensible (à déployer manuellement)
