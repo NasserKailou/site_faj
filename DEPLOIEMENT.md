@@ -128,6 +128,10 @@ Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains
 
 ## 🔧 Résolution des problèmes fréquents
 
+### Problème : 403 Accès refusé sur les pages admin (ex: /admin/projets/)
+**Cause :** Apache trouve le dossier physique `admin/projets/` avant que les RewriteRules admin ne s'appliquent, et le sert directement → 403 car `Options -Indexes`  
+**Solution :** Les RewriteRules admin doivent être **avant** la règle "servir les fichiers/dossiers existants" dans le `.htaccess`. C'est déjà corrigé dans la version actuelle.
+
 ### Problème : 404 sur toutes les pages sauf l'accueil
 **Cause :** `mod_rewrite` désactivé ou `AllowOverride` mal configuré  
 **Solution :**
