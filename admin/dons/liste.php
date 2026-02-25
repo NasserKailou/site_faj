@@ -52,7 +52,7 @@ include '../../admin/includes/layout-header.php';
         <h1 class="page-title"><i class="fas fa-hand-holding-heart"></i> Gestion des Dons</h1>
         <p class="page-subtitle">Total collecté : <strong style="color:var(--admin-secondary);"><?= number_format($total_collecte,0,',',' ') ?> FCFA</strong></p>
     </div>
-    <a href="<?= SITE_URL ?>/admin/dons/export.php" class="btn btn-outline">
+    <a href="<?= SITE_URL ?>/admin/dons/export" class="btn btn-outline">
         <i class="fas fa-file-excel"></i> Exporter CSV
     </a>
 </div>
@@ -141,7 +141,7 @@ include '../../admin/includes/layout-header.php';
                         <td style="font-size:12px; color:var(--admin-gray);"><?= date('d/m/Y H:i', strtotime($don['created_at'])) ?></td>
                         <td>
                             <div style="display:flex; gap:6px;">
-                                <a href="<?= SITE_URL ?>/admin/dons/detail.php?id=<?= $don['id'] ?>" class="btn btn-sm btn-outline btn-icon" title="Voir">
+                                <a href="<?= SITE_URL ?>/admin/dons/detail?id=<?= $don['id'] ?>" class="btn btn-sm btn-outline btn-icon" title="Voir">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <?php if ($don['statut'] === 'en_attente'): ?>

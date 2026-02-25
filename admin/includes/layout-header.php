@@ -25,14 +25,14 @@
     <nav class="sidebar-nav">
         <div class="nav-section">
             <span class="nav-section-label">Principal</span>
-            <a href="<?= SITE_URL ?>/admin/dashboard.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'dashboard') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/dashboard" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'dashboard') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-tachometer-alt"></i> <span>Tableau de Bord</span>
             </a>
         </div>
         
         <div class="nav-section">
             <span class="nav-section-label">Collecte de Fonds</span>
-            <a href="<?= SITE_URL ?>/admin/dons/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/dons/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/dons" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/dons/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-hand-holding-heart"></i> <span>Dons</span>
                 <?php
                 try {
@@ -45,26 +45,26 @@
         
         <div class="nav-section">
             <span class="nav-section-label">Contenu du site</span>
-            <a href="<?= SITE_URL ?>/admin/projets/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/projets/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/projets" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/projets/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-project-diagram"></i> <span>Projets</span>
             </a>
-            <a href="<?= SITE_URL ?>/admin/actualites/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/actualites/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/actualites" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/actualites/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-newspaper"></i> <span>Actualités</span>
             </a>
-            <a href="<?= SITE_URL ?>/admin/equipe/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/equipe/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/equipe" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/equipe/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-users"></i> <span>Équipe</span>
             </a>
-            <a href="<?= SITE_URL ?>/admin/partenaires/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/partenaires/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/partenaires" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/partenaires/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-handshake"></i> <span>Partenaires</span>
             </a>
-            <a href="<?= SITE_URL ?>/admin/temoignages/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/temoignages/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/temoignages" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/temoignages/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-quote-left"></i> <span>Témoignages</span>
             </a>
         </div>
         
         <div class="nav-section">
             <span class="nav-section-label">Communication</span>
-            <a href="<?= SITE_URL ?>/admin/contacts/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/contacts/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/contacts" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/contacts/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-envelope"></i> <span>Messages</span>
                 <?php
                 try {
@@ -73,17 +73,17 @@
                 } catch(Exception $e) {}
                 ?>
             </a>
-            <a href="<?= SITE_URL ?>/admin/newsletter/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/newsletter/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/newsletter" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/newsletter/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-at"></i> <span>Newsletter</span>
             </a>
         </div>
         
         <div class="nav-section">
             <span class="nav-section-label">Configuration</span>
-            <a href="<?= SITE_URL ?>/admin/parametres.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'parametres') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/parametres" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'parametres') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-cog"></i> <span>Paramètres</span>
             </a>
-            <a href="<?= SITE_URL ?>/admin/admins/liste.php" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/admins/') !== false) ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/admin/admins" class="nav-link <?= (strpos($_SERVER['PHP_SELF'],'/admins/') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-user-shield"></i> <span>Administrateurs</span>
             </a>
         </div>
@@ -96,7 +96,7 @@
             <span class="user-name"><?= sanitize($_SESSION['admin_nom'] ?? 'Admin') ?></span>
             <span class="user-role"><?= ucfirst(str_replace('_',' ',$_SESSION['admin_role'] ?? 'admin')) ?></span>
         </div>
-        <a href="<?= SITE_URL ?>/admin/logout.php" title="Déconnexion" class="logout-btn">
+        <a href="<?= SITE_URL ?>/admin/logout" title="Déconnexion" class="logout-btn">
             <i class="fas fa-sign-out-alt"></i>
         </a>
     </div>
@@ -110,7 +110,7 @@
             <i class="fas fa-bars"></i>
         </button>
         <div class="topbar-breadcrumb">
-            <a href="<?= SITE_URL ?>/admin/dashboard.php">Admin</a>
+            <a href="<?= SITE_URL ?>/admin/dashboard">Admin</a>
             <?php if (isset($page_title) && $page_title !== 'Tableau de Bord'): ?>
             <i class="fas fa-chevron-right"></i>
             <span><?= $page_title ?></span>
@@ -120,7 +120,7 @@
             <a href="<?= SITE_URL ?>/" target="_blank" class="topbar-action-btn" title="Voir le site public">
                 <i class="fas fa-external-link-alt"></i>
             </a>
-            <a href="<?= SITE_URL ?>/admin/logout.php" class="topbar-action-btn" title="Déconnexion">
+            <a href="<?= SITE_URL ?>/admin/logout" class="topbar-action-btn" title="Déconnexion">
                 <i class="fas fa-sign-out-alt"></i>
             </a>
         </div>
