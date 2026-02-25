@@ -246,19 +246,11 @@ require_once 'includes/header.php';
                 <!-- Colonne gauche — Photo + identité -->
                 <div style="background:linear-gradient(180deg,rgba(232,135,10,0.18) 0%,rgba(10,22,40,0.9) 100%);padding:40px 32px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-right:1px solid rgba(232,135,10,0.15);">
 
-                    <!-- Photo du DG -->
-                    <div style="width:150px;height:150px;border-radius:50%;overflow:hidden;border:4px solid #E8870A;box-shadow:0 0 0 8px rgba(232,135,10,0.15);margin-bottom:24px;flex-shrink:0;">
+                    <!-- Photo du DG (image complète avec logo intégré) -->
+                    <div style="width:100%;margin-bottom:20px;flex-shrink:0;">
                         <img src="<?= SITE_URL ?>/assets/images/photo-dg.jpg"
-                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                             alt="Dr Idé Souleymane" style="width:100%;height:100%;object-fit:cover;object-position:center top;">
-                        <div style="display:none;width:100%;height:100%;background:linear-gradient(135deg,#E8870A,#c96d00);align-items:center;justify-content:center;">
-                            <i class="fas fa-user-tie" style="font-size:60px;color:white;opacity:0.8;"></i>
-                        </div>
-                    </div>
-
-                    <!-- Logo FAJ -->
-                    <div style="width:72px;height:72px;border-radius:50%;overflow:hidden;border:2px solid rgba(232,135,10,0.4);margin-bottom:20px;">
-                        <img src="<?= SITE_URL ?>/assets/images/logo-faj.png" alt="FAJ" style="width:100%;height:100%;object-fit:contain;padding:6px;background:white;">
+                             alt="Dr Idé Souleymane — Directeur Général FAJ"
+                             style="width:100%;height:auto;display:block;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
                     </div>
 
                     <h3 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;line-height:1.3;">Dr Idé Souleymane</h3>
