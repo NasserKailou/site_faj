@@ -48,6 +48,9 @@ ServerSignature Off
     RewriteRule ^admin/contacts/?$             admin/contacts/liste.php     [L,QSA]
     RewriteRule ^admin/newsletter/?$           admin/newsletter/liste.php   [L,QSA]
     RewriteRule ^admin/admins/?$               admin/admins/liste.php       [L,QSA]
+    # Routes admin avec paramètre ID
+    RewriteRule ^admin/dons/detail$            admin/dons/detail.php        [L,QSA]
+    RewriteRule ^admin/dons/export$            admin/dons/export.php        [L,QSA]
 
     # ── 7. Routes pages principales ───────────────────────────────────────
     RewriteRule ^a-propos$                   pages/a-propos.php               [L,QSA]

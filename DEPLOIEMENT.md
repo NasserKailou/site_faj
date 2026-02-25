@@ -1,121 +1,160 @@
-# Guide de déploiement — Site FAJ Niger
+# GUIDE DÉPLOIEMENT — Site FAJ Niger
+## Procédure complète : XAMPP local → Production
 
-## ✅ Checklist avant déploiement
+---
 
-### 1. Modifier `includes/config.php`
+## ✅ CHECKLIST AVANT DÉPLOIEMENT
 
+### 1. Fichiers à modifier pour la production
+
+#### `includes/config.php`
 ```php
-// LOCAL XAMPP
+// XAMPP local
 define('SITE_URL', 'http://localhost:8085/site_faj');
 
-// PRODUCTION (remplacer par votre vrai domaine)
+// ↓ Production (remplacer par votre vrai domaine)
 define('SITE_URL', 'https://www.faj.ne');
 ```
 
-### 2. Modifier `.htaccess`
-
+#### `.htaccess`
 ```apache
-# LOCAL XAMPP (sous-dossier)
+# XAMPP local → sous-dossier
 RewriteBase /site_faj/
 
-# PRODUCTION (domaine racine)
+# ↓ Production → domaine racine
+RewriteBase /
+```
+> Si le site est dans un sous-dossier en prod (ex: `/faj/`), mettre `RewriteBase /faj/`
+
+---
+
+### 2. Prérequis serveur de production
+
+| Requis | Détail |
+|--------|--------|
+| PHP 8.0+ | Avec extensions : `pdo`, `pdo_mysql`, `mbstring`, `openssl` |
+| Apache 2.4+ | Modules activés : `mod_rewrite`, `mod_headers`, `mod_deflate` |
+| MySQL 5.7+ | Ou MariaDB 10.4+ |
+| HTTPS | Certificat SSL (Let's Encrypt gratuit) |
+| `.htaccess` | `AllowOverride All` dans la config Apache |
+
+---
+
+### 3. Étapes de déploiement
+
+#### ÉTAPE 1 — Préparer les fichiers
+```bash
+# Sur votre machine, modifier config.php :
+define('SITE_URL', 'https://www.faj.ne');
+define('DB_HOST',  'localhost');
+define('DB_NAME',  'faj_niger');
+define('DB_USER',  'votre_user_mysql');
+define('DB_PASS',  'votre_mot_de_passe');
+
+# Modifier .htaccess :
 RewriteBase /
 ```
 
-Et adapter les pages d'erreur :
-```apache
-# LOCAL
-ErrorDocument 404 /site_faj/pages/404.php
-
-# PRODUCTION
-ErrorDocument 404 /pages/404.php
-```
-
-### 3. Base de données MySQL
-
-Importer `database.sql` dans votre serveur MySQL de production.
-
-Puis exécuter le patch mot de passe si nécessaire :
+#### ÉTAPE 2 — Créer la base de données
 ```sql
-UPDATE admins
-SET mot_de_passe = '$2y$12$LjpqZHL7iq1U7SdycSbUXO7FwI4ATM3gWCp29eNJC9pLRrkSbJoQy'
-WHERE email = 'admin@faj.ne';
+-- Dans phpMyAdmin ou en ligne de commande :
+CREATE DATABASE faj_niger CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Puis importer database.sql
 ```
 
-Identifiants admin : `admin@faj.ne` / `Admin@FAJ2024!`
+#### ÉTAPE 3 — Uploader les fichiers
+Via FTP (FileZilla) ou panel d'hébergement :
+```
+Uploader TOUT le contenu du dossier site_faj/
+vers le dossier public_html/ (ou www/ ou httpdocs/)
+```
 
-### 4. Paramètres du serveur Apache (hébergeur mutualisé / VPS)
-
-Vérifier dans le panneau de contrôle (cPanel, Plesk, etc.) que :
-- `mod_rewrite` est **activé**
-- `AllowOverride All` est configuré pour votre répertoire
-- PHP 8.x est actif
-
-### 5. Permissions des fichiers
-
+#### ÉTAPE 4 — Vérifier les permissions
 ```bash
 chmod 755 uploads/
-chmod 755 uploads/projets/
 chmod 755 uploads/actualites/
+chmod 755 uploads/projets/
 chmod 755 uploads/equipe/
+chmod 644 includes/config.php
 chmod 644 .htaccess
-chmod 600 includes/config.php
 ```
 
-### 6. HTTPS en production
+#### ÉTAPE 5 — Activer les erreurs (temporairement pour le debug)
+Dans `includes/config.php` :
+```php
+define('DEBUG_MODE', true); // Remettre false après vérification !
+```
 
-Dans `.htaccess`, décommenter :
+#### ÉTAPE 6 — Tester toutes les URLs
+```
+https://www.faj.ne/                          ✓ Accueil
+https://www.faj.ne/a-propos                  ✓ À propos
+https://www.faj.ne/projets                   ✓ Projets
+https://www.faj.ne/actualites                ✓ Actualités
+https://www.faj.ne/contact                   ✓ Contact
+https://www.faj.ne/don                       ✓ Don
+https://www.faj.ne/equipe                    ✓ Équipe
+https://www.faj.ne/faq                       ✓ FAQ
+https://www.faj.ne/admin/login               ✓ Admin login
+https://www.faj.ne/admin/dashboard           ✓ Admin tableau de bord
+```
+
+#### ÉTAPE 7 — Désactiver le mode debug
+```php
+define('DEBUG_MODE', false);
+```
+
+---
+
+## 🔐 Sécurité en production
+
+### Dans `.htaccess`, décommenter HTTPS :
 ```apache
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 ```
 
-Et dans `includes/config.php` :
+### Dans `includes/config.php`, activer le cookie sécurisé :
 ```php
 ini_set('session.cookie_secure', 1);  // Mettre 1 en production HTTPS
 ```
 
-Et décommenter dans `.htaccess` :
+### Dans `.htaccess`, activer HSTS :
 ```apache
 Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 ```
 
 ---
 
-## Structure des URLs
+## 🔧 Résolution des problèmes fréquents
 
-| URL propre | Fichier PHP réel |
-|---|---|
-| `/` | `index.php` |
-| `/a-propos` | `pages/a-propos.php` |
-| `/projets` | `pages/projets.php` |
-| `/projets/{slug}` | `pages/projet-detail.php?slug={slug}` |
-| `/actualites` | `pages/actualites.php` |
-| `/actualites/{slug}` | `pages/actualite-detail.php?slug={slug}` |
-| `/contact` | `pages/contact.php` |
-| `/don` | `pages/don.php` |
-| `/equipe` | `pages/equipe.php` |
-| `/faq` | `pages/faq.php` |
-| `/admin/login` | `admin/login.php` |
-| `/admin/dashboard` | `admin/dashboard.php` |
-| `/admin/dons` | `admin/dons/liste.php` |
-| `/admin/projets` | `admin/projets/liste.php` |
-| `/admin/actualites` | `admin/actualites/liste.php` |
-| `/admin/equipe` | `admin/equipe/liste.php` |
-| `/admin/temoignages` | `admin/temoignages/liste.php` |
-| `/admin/contacts` | `admin/contacts/liste.php` |
-| `/admin/parametres` | `admin/parametres.php` |
+### Problème : 404 sur toutes les pages sauf l'accueil
+**Cause :** `mod_rewrite` désactivé ou `AllowOverride` mal configuré  
+**Solution :**
+1. Activer `mod_rewrite` dans `httpd.conf` : `LoadModule rewrite_module modules/mod_rewrite.so`
+2. Vérifier `AllowOverride All` dans le bloc `<Directory>` de votre vhost
+3. Vérifier que `RewriteBase` correspond à l'emplacement du site
+
+### Problème : RewriteBase à adapter selon l'emplacement
+| Situation | RewriteBase |
+|-----------|-------------|
+| XAMPP local dans `/site_faj/` | `RewriteBase /site_faj/` |
+| Production domaine racine | `RewriteBase /` |
+| Production sous-dossier `/faj/` | `RewriteBase /faj/` |
+
+### Problème : Erreur de connexion BDD
+- Vérifier `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` dans `config.php`
+- Si pas de MySQL → SQLite s'active automatiquement (fallback)
+
+### Problème : Images non affichées
+- Vérifier que le dossier `uploads/` a les permissions 755
+- Vérifier que `UPLOADS_URL` pointe vers la bonne URL
 
 ---
 
-## Récapitulatif des différences LOCAL vs PRODUCTION
+## 📋 Identifiants par défaut
+| Rôle | Email | Mot de passe |
+|------|-------|-------------|
+| Super Admin | `admin@faj.ne` | `Admin@FAJ2024!` |
 
-| Paramètre | Local XAMPP | Production |
-|---|---|---|
-| `SITE_URL` | `http://localhost:8085/site_faj` | `https://www.faj.ne` |
-| `RewriteBase` | `/site_faj/` | `/` |
-| `ErrorDocument` | `/site_faj/pages/xxx.php` | `/pages/xxx.php` |
-| HTTPS redirect | Désactivé | Activé |
-| HSTS header | Désactivé | Activé |
-| `session.cookie_secure` | `0` | `1` |
-| `DEBUG_MODE` | `false` (conseillé `true` en dev) | `false` |
+> ⚠️ **Changer le mot de passe en production via l'interface admin > Paramètres**
