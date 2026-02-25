@@ -7,14 +7,14 @@
 // ─── Paramètres du site ──────────────────────────────────────────────────────
 define('SITE_NAME',    'Fonds d\'Appui à la Justice');
 define('SITE_ABBR',    'F.A.J');
-define('SITE_URL',     'https://3000-ie7yyfrxzjw94sky3utmf-cbeee0f9.sandbox.novita.ai');
+define('SITE_URL',     'http://localhost:8085/site_faj');
 define('SITE_EMAIL',   'contact@faj.ne');
 define('SITE_PHONE',   '+227 20 XX XX XX');
 define('SITE_ADDRESS', 'Niamey, Niger');
 
 // ─── Base de données ─────────────────────────────────────────────────────────
 define('DB_HOST',    'localhost');
-define('DB_NAME',    'faj_db');
+define('DB_NAME',    'faj_niger');
 define('DB_USER',    'root');
 define('DB_PASS',    '');
 define('DB_CHARSET', 'utf8mb4');
