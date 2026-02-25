@@ -4,25 +4,36 @@ ServerSignature Off
 # ─── Réécriture d'URL ──────────────────────────────────────────────────────
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
 
-    # Rediriger vers HTTPS en production
-    # RewriteCond %{HTTPS} off
-    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # IMPORTANT : adapter RewriteBase selon l'environnement
+    # - En local XAMPP sous /site_faj/  → RewriteBase /site_faj/
+    # - En production (domaine racine)  → RewriteBase /
+    RewriteBase /site_faj/
 
-    # Supprimer le www
-    # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    # RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+    # ── 1. Ne pas réécrire les fichiers/dossiers existants ────────────────
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
 
-    # ── Supprimer l'extension .php (URLs propres) ─────────────────────────
-    # Si la requête n'est pas un fichier réel, ni un dossier réel
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
+    # ── 2. Bloquer l'accès aux répertoires sensibles ──────────────────────
+    RewriteRule ^includes/        - [F,L]
+    RewriteRule ^admin/includes/  - [F,L]
+    RewriteRule ^logs/            - [F,L]
+    RewriteRule ^\.git/           - [F,L]
 
-    # Pages principales sans préfixe
-    RewriteRule ^(a-propos|projets|actualites|contact|don|equipe|don-succes|don-annule|conditions-generales|politique-confidentialite|faq)$ pages/$1.php [L,QSA]
+    # ── 3. Bloquer les injections SQL dans l'URL ──────────────────────────
+    RewriteCond %{QUERY_STRING} (union.*select|select.*from|insert.*into|drop.*table) [NC]
+    RewriteRule .* - [F,L]
 
-    # Admin sans extension
+    # ── 4. Bloquer XSS dans l'URL ─────────────────────────────────────────
+    RewriteCond %{QUERY_STRING} (<script|javascript:|vbscript:|onload=|onerror=) [NC]
+    RewriteRule .* - [F,L]
+
+    # ── 5. Bloquer les traversées de répertoire ───────────────────────────
+    RewriteCond %{REQUEST_URI} \.\./ [NC]
+    RewriteRule .* - [F,L]
+
+    # ── 6. Routes Admin ───────────────────────────────────────────────────
     RewriteRule ^admin/?$                    admin/index.php          [L,QSA]
     RewriteRule ^admin/login$                admin/login.php          [L,QSA]
     RewriteRule ^admin/logout$               admin/logout.php         [L,QSA]
@@ -34,18 +45,23 @@ ServerSignature Off
     RewriteRule ^admin/contacts/?$           admin/contacts/liste.php [L,QSA]
     RewriteRule ^admin/parametres$           admin/parametres.php     [L,QSA]
 
-    # Projets avec slug
-    RewriteRule ^projets/([a-z0-9-]+)$       pages/projet-detail.php?slug=$1 [L,QSA]
+    # ── 7. Routes pages principales ───────────────────────────────────────
+    RewriteRule ^a-propos$                   pages/a-propos.php               [L,QSA]
+    RewriteRule ^projets$                    pages/projets.php                [L,QSA]
+    RewriteRule ^actualites$                 pages/actualites.php             [L,QSA]
+    RewriteRule ^contact$                    pages/contact.php                [L,QSA]
+    RewriteRule ^don$                        pages/don.php                    [L,QSA]
+    RewriteRule ^equipe$                     pages/equipe.php                 [L,QSA]
+    RewriteRule ^don-succes$                 pages/don-succes.php             [L,QSA]
+    RewriteRule ^don-annule$                 pages/don-annule.php             [L,QSA]
+    RewriteRule ^conditions-generales$       pages/conditions-generales.php   [L,QSA]
+    RewriteRule ^politique-confidentialite$  pages/politique-confidentialite.php [L,QSA]
+    RewriteRule ^faq$                        pages/faq.php                    [L,QSA]
 
-    # Actualités avec slug
+    # ── 8. Routes avec slug dynamique ─────────────────────────────────────
+    RewriteRule ^projets/([a-z0-9-]+)$       pages/projet-detail.php?slug=$1  [L,QSA]
     RewriteRule ^actualites/([a-z0-9-]+)$    pages/actualite-detail.php?slug=$1 [L,QSA]
 
-    # Rediriger les URL .php vers URL propre (éviter le doublon)
-    RewriteCond %{THE_REQUEST} /pages/([^/]+)\.php [NC]
-    RewriteRule ^ /%1? [R=301,L]
-
-    RewriteCond %{THE_REQUEST} /admin/([^/]+)\.php [NC]
-    RewriteRule ^ /admin/%1? [R=301,L]
 </IfModule>
 
 # ─── Protection des fichiers sensibles ──────────────────────────────────────
@@ -54,14 +70,6 @@ ServerSignature Off
     Deny from all
 </FilesMatch>
 
-# Bloquer l'accès aux répertoires sensibles
-<IfModule mod_rewrite.c>
-    RewriteRule ^includes/        - [F,L]
-    RewriteRule ^admin/includes/  - [F,L]
-    RewriteRule ^logs/            - [F,L]
-    RewriteRule ^\.git/           - [F,L]
-</IfModule>
-
 # ─── Headers de sécurité HTTP ────────────────────────────────────────────────
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options   "nosniff"
@@ -69,7 +77,8 @@ ServerSignature Off
     Header always set X-XSS-Protection         "1; mode=block"
     Header always set Referrer-Policy          "strict-origin-when-cross-origin"
     Header always set Permissions-Policy       "geolocation=(), microphone=(), camera=()"
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    # Désactivé en local HTTP (activer en production HTTPS uniquement)
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
     Header always set Content-Security-Policy  "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https: data:;"
 
     # Supprimer les headers révélateurs
@@ -100,24 +109,9 @@ ServerSignature Off
 </IfModule>
 
 # ─── Pages d'erreur personnalisées ──────────────────────────────────────────
-ErrorDocument 404 /pages/404.php
-ErrorDocument 403 /pages/403.php
-ErrorDocument 500 /pages/500.php
-
-# ─── Protection contre les injections courantes ─────────────────────────────
-<IfModule mod_rewrite.c>
-    # Bloquer les tentatives d'injection SQL dans l'URL
-    RewriteCond %{QUERY_STRING} (union.*select|select.*from|insert.*into|drop.*table) [NC]
-    RewriteRule .* - [F,L]
-
-    # Bloquer XSS dans l'URL
-    RewriteCond %{QUERY_STRING} (<script|javascript:|vbscript:|onload=|onerror=) [NC]
-    RewriteRule .* - [F,L]
-
-    # Bloquer les traversées de répertoire
-    RewriteCond %{REQUEST_URI} \.\./
-    RewriteRule .* - [F,L]
-</IfModule>
+ErrorDocument 404 /site_faj/pages/404.php
+ErrorDocument 403 /site_faj/pages/403.php
+ErrorDocument 500 /site_faj/pages/500.php
 
 # ─── Limiter la taille des uploads ──────────────────────────────────────────
 <IfModule mod_php8.c>
