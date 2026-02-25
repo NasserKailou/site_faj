@@ -29,11 +29,11 @@
                     <h4 class="footer-title">Liens Rapides</h4>
                     <ul class="footer-links">
                         <li><a href="<?= SITE_URL ?>/"><i class="fas fa-chevron-right"></i> Accueil</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/a-propos.php"><i class="fas fa-chevron-right"></i> À Propos</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/projets.php"><i class="fas fa-chevron-right"></i> Nos Projets</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/actualites.php"><i class="fas fa-chevron-right"></i> Actualités</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/equipe.php"><i class="fas fa-chevron-right"></i> Équipe</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/contact.php"><i class="fas fa-chevron-right"></i> Contact</a></li>
+                        <li><a href="<?= SITE_URL ?>/a-propos"><i class="fas fa-chevron-right"></i> À Propos</a></li>
+                        <li><a href="<?= SITE_URL ?>/projets"><i class="fas fa-chevron-right"></i> Nos Projets</a></li>
+                        <li><a href="<?= SITE_URL ?>/actualites"><i class="fas fa-chevron-right"></i> Actualités</a></li>
+                        <li><a href="<?= SITE_URL ?>/equipe"><i class="fas fa-chevron-right"></i> Équipe</a></li>
+                        <li><a href="<?= SITE_URL ?>/contact"><i class="fas fa-chevron-right"></i> Contact</a></li>
                     </ul>
                 </div>
                 
@@ -41,12 +41,12 @@
                 <div class="footer-col">
                     <h4 class="footer-title">Nos Programmes</h4>
                     <ul class="footer-links">
-                        <li><a href="<?= SITE_URL ?>/pages/projets.php?cat=infrastructure"><i class="fas fa-chevron-right"></i> Infrastructures Judiciaires</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/projets.php?cat=formation"><i class="fas fa-chevron-right"></i> Formation & Renforcement</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/projets.php?cat=humanisation"><i class="fas fa-chevron-right"></i> Humanisation Carcérale</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/projets.php?cat=acces_justice"><i class="fas fa-chevron-right"></i> Accès à la Justice</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/projets.php?cat=numerisation"><i class="fas fa-chevron-right"></i> Numérisation</a></li>
-                        <li><a href="<?= SITE_URL ?>/pages/don.php"><i class="fas fa-chevron-right"></i> Faire un Don</a></li>
+                        <li><a href="<?= SITE_URL ?>/projets?cat=infrastructure"><i class="fas fa-chevron-right"></i> Infrastructures Judiciaires</a></li>
+                        <li><a href="<?= SITE_URL ?>/projets?cat=formation"><i class="fas fa-chevron-right"></i> Formation &amp; Renforcement</a></li>
+                        <li><a href="<?= SITE_URL ?>/projets?cat=humanisation"><i class="fas fa-chevron-right"></i> Humanisation Carcérale</a></li>
+                        <li><a href="<?= SITE_URL ?>/projets?cat=acces_justice"><i class="fas fa-chevron-right"></i> Accès à la Justice</a></li>
+                        <li><a href="<?= SITE_URL ?>/projets?cat=numerisation"><i class="fas fa-chevron-right"></i> Numérisation</a></li>
+                        <li><a href="<?= SITE_URL ?>/don"><i class="fas fa-chevron-right"></i> Faire un Don</a></li>
                     </ul>
                 </div>
                 
@@ -87,9 +87,9 @@
             <div class="footer-bottom-inner">
                 <p>&copy; <?= date('Y') ?> FAJ - Fonds d'Appui à la Justice du Niger. Tous droits réservés.</p>
                 <div class="footer-bottom-links">
-                    <a href="<?= SITE_URL ?>/pages/mentions-legales.php">Mentions légales</a>
-                    <a href="<?= SITE_URL ?>/pages/politique-confidentialite.php">Confidentialité</a>
-                    <a href="<?= SITE_URL ?>/pages/conditions-generales.php">CGU</a>
+                    <a href="<?= SITE_URL ?>/mentions-legales">Mentions légales</a>
+                    <a href="<?= SITE_URL ?>/politique-confidentialite">Confidentialité</a>
+                    <a href="<?= SITE_URL ?>/conditions-generales">CGU</a>
                 </div>
                 <div class="footer-payments">
                     <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/visa.svg" alt="Visa" class="payment-icon">

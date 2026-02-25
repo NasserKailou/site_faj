@@ -85,12 +85,12 @@ require_once '../includes/header.php';
                         <span><i class="fas fa-eye"></i> <?= $actu['nb_vues'] ?> vues</span>
                     </div>
                     <h3 class="news-title">
-                        <a href="<?= SITE_URL ?>/pages/actualite-detail.php?slug=<?= $actu['slug'] ?>">
+                        <a href="<?= SITE_URL ?>/actualites/<?= $actu['slug'] ?>">
                             <?= sanitize($actu['titre']) ?>
                         </a>
                     </h3>
                     <p class="news-excerpt"><?= sanitize($actu['extrait'] ?? substr(strip_tags($actu['contenu'] ?? ''), 0, 150) . '...') ?></p>
-                    <a href="<?= SITE_URL ?>/pages/actualite-detail.php?slug=<?= $actu['slug'] ?>" class="read-more">
+                    <a href="<?= SITE_URL ?>/actualites/<?= $actu['slug'] ?>" class="read-more">
                         Lire la suite <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>

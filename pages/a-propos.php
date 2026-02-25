@@ -40,10 +40,10 @@ require_once '../includes/header.php';
                     ') ?>
                 </div>
                 <div style="display:flex; gap:16px; margin-top:30px;">
-                    <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-primary">
+                    <a href="<?= SITE_URL ?>/don" class="btn btn-primary">
                         <i class="fas fa-heart"></i> Soutenir le FAJ
                     </a>
-                    <a href="<?= SITE_URL ?>/pages/projets.php" class="btn btn-outline-primary">
+                    <a href="<?= SITE_URL ?>/projets" class="btn btn-outline-primary">
                         <i class="fas fa-project-diagram"></i> Nos Projets
                     </a>
                 </div>
@@ -189,7 +189,7 @@ require_once '../includes/header.php';
     <div class="container" data-aos="fade-up">
         <h2>Rejoignez notre combat pour la Justice</h2>
         <p>Faites un don aujourd'hui et participez à la construction d'un Niger plus juste.</p>
-        <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-white btn-lg">
+        <a href="<?= SITE_URL ?>/don" class="btn btn-white btn-lg">
             <i class="fas fa-heart"></i> Faire un Don
         </a>
     </div>
