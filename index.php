@@ -215,6 +215,135 @@ require_once 'includes/header.php';
     </div>
 </section>
 
+<!-- ===== MOT DU DIRECTEUR GÉNÉRAL ===== -->
+<section class="dg-section" style="padding:80px 0; background:linear-gradient(135deg, #0a1628 0%, #1a2e50 50%, #0a1628 100%); position:relative; overflow:hidden;">
+
+    <!-- Décoration de fond -->
+    <div style="position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:rgba(232,135,10,0.06);pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;border-radius:50%;background:rgba(232,135,10,0.04);pointer-events:none;"></div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;border-radius:50%;border:1px solid rgba(232,135,10,0.08);pointer-events:none;"></div>
+
+    <div class="container" style="position:relative;z-index:2;">
+
+        <!-- En-tête de section -->
+        <div class="section-header centered" data-aos="fade-up" style="margin-bottom:56px;">
+            <span class="section-tag" style="background:rgba(232,135,10,0.15);color:#E8870A;border:1px solid rgba(232,135,10,0.3);">
+                <i class="fas fa-quote-left"></i>&nbsp; Mot du Directeur Général
+            </span>
+            <h2 class="section-title" style="color:white;">
+                La Vision du <span style="color:#E8870A;">FAJ Niger</span>
+            </h2>
+            <p class="section-subtitle" style="color:rgba(255,255,255,0.65); max-width:600px; margin:0 auto;">
+                Le message du Dr Idé Souleymane, Directeur Général du Fonds d'Appui à la Justice
+            </p>
+        </div>
+
+        <!-- Carte principale DG -->
+        <div data-aos="fade-up" data-aos-delay="100" style="max-width:1000px;margin:0 auto;background:rgba(255,255,255,0.04);border:1px solid rgba(232,135,10,0.2);border-radius:24px;overflow:hidden;backdrop-filter:blur(10px);">
+
+            <div style="display:grid;grid-template-columns:300px 1fr;min-height:480px;">
+
+                <!-- Colonne gauche — Photo + identité -->
+                <div style="background:linear-gradient(180deg,rgba(232,135,10,0.18) 0%,rgba(10,22,40,0.9) 100%);padding:40px 32px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-right:1px solid rgba(232,135,10,0.15);">
+
+                    <!-- Photo du DG -->
+                    <div style="width:150px;height:150px;border-radius:50%;overflow:hidden;border:4px solid #E8870A;box-shadow:0 0 0 8px rgba(232,135,10,0.15);margin-bottom:24px;flex-shrink:0;">
+                        <img src="<?= SITE_URL ?>/assets/images/photo-dg.jpg"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                             alt="Dr Idé Souleymane" style="width:100%;height:100%;object-fit:cover;object-position:center top;">
+                        <div style="display:none;width:100%;height:100%;background:linear-gradient(135deg,#E8870A,#c96d00);align-items:center;justify-content:center;">
+                            <i class="fas fa-user-tie" style="font-size:60px;color:white;opacity:0.8;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Logo FAJ -->
+                    <div style="width:72px;height:72px;border-radius:50%;overflow:hidden;border:2px solid rgba(232,135,10,0.4);margin-bottom:20px;">
+                        <img src="<?= SITE_URL ?>/assets/images/logo-faj.png" alt="FAJ" style="width:100%;height:100%;object-fit:contain;padding:6px;background:white;">
+                    </div>
+
+                    <h3 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;line-height:1.3;">Dr Idé Souleymane</h3>
+                    <p style="color:#E8870A;font-size:13px;font-weight:600;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;">Directeur Général</p>
+                    <p style="color:rgba(255,255,255,0.5);font-size:12px;font-style:italic;line-height:1.5;">Fonds d'Appui à la Justice — Niger</p>
+
+                    <!-- Séparateur décoratif -->
+                    <div style="width:40px;height:2px;background:#E8870A;margin:20px auto;border-radius:1px;"></div>
+
+                    <!-- Slogan -->
+                    <p style="color:rgba(255,255,255,0.6);font-size:12px;font-style:italic;line-height:1.6;text-align:center;">
+                        « Le FAJ, l'assurance<br>d'une Justice moderne »
+                    </p>
+                </div>
+
+                <!-- Colonne droite — Discours -->
+                <div style="padding:48px 48px 40px;display:flex;flex-direction:column;justify-content:space-between;">
+
+                    <!-- Guillemet décoratif -->
+                    <div>
+                        <div style="font-size:80px;line-height:1;color:rgba(232,135,10,0.2);font-family:Georgia,serif;margin-bottom:-20px;margin-left:-8px;">"</div>
+
+                        <p style="color:rgba(255,255,255,0.85);font-size:15px;line-height:1.9;margin-bottom:20px;">
+                            Le Fonds d'Appui à la Justice (FAJ) est un Fonds d'État créé par le décret N°2023-113/PRN/MJ du 26 janvier 2023. Il a pour mission de promouvoir l'investissement dans le domaine de la Justice à travers la mobilisation des fonds pour financer et soutenir les services judiciaires et pénitentiaires ainsi que l'assistance juridique et judiciaire pour un meilleur accès à la justice et la modernisation du système carcéral.
+                        </p>
+
+                        <!-- Missions en liste stylisée -->
+                        <div style="margin-bottom:24px;">
+                            <p style="color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Nos missions spécifiques</p>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;">
+                                <?php
+                                $missions = [
+                                    ['fas fa-building-columns', 'Construction & réhabilitation des juridictions'],
+                                    ['fas fa-laptop-code',       'Informatisation du système judiciaire'],
+                                    ['fas fa-prison',            'Équipement des établissements pénitentiaires'],
+                                    ['fas fa-seedling',          'Réinsertion sociale des détenus'],
+                                    ['fas fa-truck',             'Moyens logistiques des services judiciaires'],
+                                    ['fas fa-hands-holding-child','Aide aux femmes, enfants et personnes indigentes'],
+                                ];
+                                foreach ($missions as [$icon, $label]):
+                                ?>
+                                <div style="display:flex;align-items:flex-start;gap:8px;">
+                                    <i class="<?= $icon ?>" style="color:#E8870A;font-size:12px;margin-top:4px;flex-shrink:0;"></i>
+                                    <span style="color:rgba(255,255,255,0.65);font-size:12px;line-height:1.5;"><?= $label ?></span>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <!-- Citation forte -->
+                        <blockquote style="border-left:3px solid #E8870A;padding:14px 20px;background:rgba(232,135,10,0.07);border-radius:0 10px 10px 0;margin-bottom:24px;">
+                            <p style="color:rgba(255,255,255,0.80);font-size:14px;font-style:italic;line-height:1.8;margin:0;">
+                                « Notre ambition : qu'à l'horizon 2035, il y ait un meilleur accès à la Justice et un système carcéral modernisé. La Justice est rendue au nom du peuple, le peuple contribuera à sa modernisation. »
+                            </p>
+                        </blockquote>
+
+                        <!-- Appel à l'action -->
+                        <p style="color:#E8870A;font-weight:700;font-size:15px;font-style:italic;margin-bottom:28px;">
+                            À l'unisson, nous pouvons relever tous les défis à travers nos contributions !
+                        </p>
+                    </div>
+
+                    <!-- Footer carte : signature + boutons -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);">
+                        <div>
+                            <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Décret N°2023-113/PRN/MJ · 26 janv. 2023</p>
+                            <p style="color:white;font-weight:700;font-size:14px;">Dr Idé Souleymane — Directeur Général, FAJ Niger</p>
+                        </div>
+                        <div style="display:flex;gap:12px;">
+                            <a href="<?= SITE_URL ?>/a-propos" class="btn btn-outline" style="border-color:rgba(232,135,10,0.5);color:#E8870A;font-size:13px;padding:10px 20px;">
+                                <i class="fas fa-info-circle"></i> En savoir plus
+                            </a>
+                            <a href="<?= SITE_URL ?>/don" class="btn btn-primary" style="font-size:13px;padding:10px 20px;">
+                                <i class="fas fa-hand-holding-heart"></i> Contribuer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
 <!-- ===== PROJETS ===== -->
 <section class="projects-section" id="projets">
     <div class="container">
