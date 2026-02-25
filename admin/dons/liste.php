@@ -75,7 +75,7 @@ include '../../admin/includes/layout-header.php';
                 </select>
             </div>
             <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filtrer</button>
-            <a href="<?= SITE_URL ?>/admin/dons/liste.php" class="btn btn-outline">Réinitialiser</a>
+            <a href="<?= SITE_URL ?>/admin/dons" class="btn btn-outline">Réinitialiser</a>
         </form>
     </div>
 </div>

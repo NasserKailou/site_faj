@@ -233,7 +233,7 @@ include '../../admin/includes/layout-header.php';
                                 <a href="?edit=<?= $p['id'] ?>" class="btn btn-sm btn-outline btn-icon" title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="<?= SITE_URL ?>/pages/projets.php" target="_blank" class="btn btn-sm btn-outline btn-icon" title="Voir sur le site">
+                                <a href="<?= SITE_URL ?>/projets" target="_blank" class="btn btn-sm btn-outline btn-icon" title="Voir sur le site">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <form method="POST" style="display:inline;" onsubmit="return confirm('Archiver ce projet ?')">

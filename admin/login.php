@@ -3,7 +3,7 @@ require_once '../includes/config.php';
 
 // Si déjà connecté
 if (isAdmin()) {
-    redirect(SITE_URL . '/admin/dashboard.php');
+    redirect(SITE_URL . '/admin/dashboard');
 }
 
 $error = '';
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Mise à jour dernière connexion
                 $pdo->prepare("UPDATE admins SET derniere_connexion = NOW() WHERE id = ?")->execute([$admin['id']]);
                 
-                redirect(SITE_URL . '/admin/dashboard.php');
+                redirect(SITE_URL . '/admin/dashboard');
             } else {
                 $error = 'Email ou mot de passe incorrect.';
             }

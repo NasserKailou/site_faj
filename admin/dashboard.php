@@ -49,10 +49,10 @@ include '../admin/includes/layout-header.php';
         <p class="page-subtitle">Vue d'ensemble de l'activité du FAJ Niger</p>
     </div>
     <div style="display:flex; gap:12px;">
-        <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-outline" target="_blank">
+        <a href="<?= SITE_URL ?>/" class="btn btn-outline" target="_blank">
             <i class="fas fa-external-link-alt"></i> Voir le site
         </a>
-        <a href="<?= SITE_URL ?>/admin/dons/liste.php" class="btn btn-primary">
+        <a href="<?= SITE_URL ?>/admin/dons" class="btn btn-primary">
             <i class="fas fa-hand-holding-heart"></i> Voir les dons
         </a>
     </div>
@@ -98,14 +98,14 @@ include '../admin/includes/layout-header.php';
     <div class="alert-card warning">
         <i class="fas fa-clock"></i>
         <span><?= $dons_attente ?> don(s) en attente de confirmation</span>
-        <a href="<?= SITE_URL ?>/admin/dons/liste.php?statut=en_attente">Voir</a>
+        <a href="<?= SITE_URL ?>/admin/dons?statut=en_attente">Voir</a>
     </div>
     <?php endif; ?>
     <?php if ($messages_non_lus > 0): ?>
     <div class="alert-card info">
         <i class="fas fa-envelope"></i>
         <span><?= $messages_non_lus ?> message(s) non lu(s)</span>
-        <a href="<?= SITE_URL ?>/admin/contacts/liste.php">Voir</a>
+        <a href="<?= SITE_URL ?>/admin/contacts">Voir</a>
     </div>
     <?php endif; ?>
 </div>
@@ -139,7 +139,7 @@ include '../admin/includes/layout-header.php';
 <div class="card mt-4">
     <div class="card-header">
         <h3><i class="fas fa-list"></i> Derniers Dons</h3>
-        <a href="<?= SITE_URL ?>/admin/dons/liste.php" class="btn btn-sm btn-outline">Voir tous</a>
+        <a href="<?= SITE_URL ?>/admin/dons" class="btn btn-sm btn-outline">Voir tous</a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

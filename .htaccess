@@ -56,6 +56,7 @@ ServerSignature Off
     RewriteRule ^don-annule$                 pages/don-annule.php             [L,QSA]
     RewriteRule ^conditions-generales$       pages/conditions-generales.php   [L,QSA]
     RewriteRule ^politique-confidentialite$  pages/politique-confidentialite.php [L,QSA]
+    RewriteRule ^mentions-legales$           pages/mentions-legales.php       [L,QSA]
     RewriteRule ^faq$                        pages/faq.php                    [L,QSA]
 
     # ── 8. Routes avec slug dynamique ─────────────────────────────────────

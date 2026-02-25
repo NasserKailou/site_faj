@@ -49,14 +49,14 @@ require_once '../includes/header.php';
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:50px; justify-content:center;" data-aos="fade-up">
             <button class="filter-btn <?= $cat_filter === 'all' ? 'active' : '' ?>" 
                     data-filter="all"
-                    onclick="window.location='<?= SITE_URL ?>/pages/projets.php'"
+                    onclick="window.location='<?= SITE_URL ?>/projets'"
                     style="padding:10px 22px; border-radius:50px; border:2px solid var(--light-gray); background:<?= $cat_filter === 'all' ? 'var(--secondary)' : 'white' ?>; color:<?= $cat_filter === 'all' ? 'white' : 'var(--primary)' ?>; font-weight:600; font-size:14px; cursor:pointer; transition:var(--transition);">
                 <i class="fas fa-th-large"></i> Tous les Projets
             </button>
             <?php foreach ($categories as $key => $cat): ?>
             <button class="filter-btn <?= $cat_filter === $key ? 'active' : '' ?>"
                     data-filter="<?= $key ?>"
-                    onclick="window.location='<?= SITE_URL ?>/pages/projets.php?cat=<?= $key ?>'"
+                    onclick="window.location='<?= SITE_URL ?>/projets?cat=<?= $key ?>'"
                     style="padding:10px 22px; border-radius:50px; border:2px solid var(--light-gray); background:<?= $cat_filter === $key ? 'var(--secondary)' : 'white' ?>; color:<?= $cat_filter === $key ? 'white' : 'var(--primary)' ?>; font-weight:600; font-size:14px; cursor:pointer; transition:var(--transition);">
                 <i class="<?= $cat['icon'] ?>"></i> <?= $cat['label'] ?>
             </button>
@@ -102,7 +102,7 @@ require_once '../includes/header.php';
                             <span style="font-size:12px; color:var(--gray); display:block;">Objectif</span>
                             <strong style="font-size:14px; color:var(--primary);"><?= number_format($p['objectif_montant'],0,',',' ') ?> FCFA</strong>
                         </div>
-                        <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-primary btn-sm">
+                        <a href="<?= SITE_URL ?>/don" class="btn btn-primary btn-sm">
                             <i class="fas fa-heart"></i> Soutenir
                         </a>
                     </div>
@@ -143,7 +143,7 @@ require_once '../includes/header.php';
                             <span style="font-size:12px; color:var(--gray); display:block;">Objectif</span>
                             <strong style="font-size:14px;"><?= number_format($projet['objectif_montant'],0,',',' ') ?> FCFA</strong>
                         </div>
-                        <a href="<?= SITE_URL ?>/pages/projet-detail.php?slug=<?= $projet['slug'] ?>" class="btn btn-primary btn-sm">
+                        <a href="<?= SITE_URL ?>/projets/<?= $projet['slug'] ?>" class="btn btn-primary btn-sm">
                             <i class="fas fa-eye"></i> Voir plus
                         </a>
                     </div>
@@ -160,7 +160,7 @@ require_once '../includes/header.php';
             <p style="color:rgba(255,255,255,0.78); font-size:16px; margin-bottom:30px;">
                 Chaque don, peu importe son montant, contribue à améliorer la justice au Niger.
             </p>
-            <a href="<?= SITE_URL ?>/pages/don.php" class="btn btn-primary btn-lg" style="background:var(--secondary); box-shadow:0 4px 20px rgba(232,135,10,0.5);">
+            <a href="<?= SITE_URL ?>/don" class="btn btn-primary btn-lg" style="background:var(--secondary); box-shadow:0 4px 20px rgba(232,135,10,0.5);">
                 <i class="fas fa-heart"></i> Faire un Don Maintenant
             </a>
         </div>

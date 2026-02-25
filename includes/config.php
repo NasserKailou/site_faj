@@ -296,7 +296,7 @@ function initSQLiteDB(PDO $pdo): void {
 
     // Admin par défaut (mot de passe : Admin@FAJ2024!)
     $pdo->exec("INSERT OR IGNORE INTO admins (nom, email, mot_de_passe, role) VALUES 
-        ('Super Administrateur', 'admin@faj.ne', '\$2y\$12\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super_admin');");
+        ('Super Administrateur', 'admin@faj.ne', '\$2y\$12\$LjpqZHL7iq1U7SdycSbUXO7FwI4ATM3gWCp29eNJC9pLRrkSbJoQy', 'super_admin');");
 
     $params = [
         ['site_nom',          'Fonds d\'Appui à la Justice'],

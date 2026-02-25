@@ -64,7 +64,7 @@ require_once '../includes/header.php';
                 <a href="<?= SITE_URL ?>/" class="btn btn-secondary">
                     <i class="fas fa-home"></i> Retour à l'Accueil
                 </a>
-                <a href="<?= SITE_URL ?>/pages/projets.php" class="btn btn-outline-primary">
+                <a href="<?= SITE_URL ?>/projets" class="btn btn-outline-primary">
                     <i class="fas fa-project-diagram"></i> Voir nos Projets
                 </a>
             </div>
