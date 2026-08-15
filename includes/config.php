@@ -27,19 +27,27 @@ function fajDetectBaseUrl(): string {
     // 2) Hôte (+ port si non standard)
     $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
 
-    // 3) Sous-dossier d'installation.
-    //    Comme toutes les requêtes passent par le front-controller situé à la
-    //    racine du projet (index.php / router.php), le dossier de SCRIPT_NAME
-    //    correspond exactement au sous-chemin d'installation :
-    //      - XAMPP  .../htdocs/site_faj/index.php  → SCRIPT_NAME = /site_faj/index.php → /site_faj
-    //      - racine .../htdocs/index.php           → SCRIPT_NAME = /index.php          → ''
-    //    Cette méthode est fiable partout (pas de dépendance à realpath()).
-    $subPath = '';
+    // 3) Sous-dossier d'installation = chemin URL de la RACINE du projet.
+    //    Selon la page demandée, SCRIPT_NAME pointe soit vers le front-controller
+    //    à la racine, soit vers un script dans un sous-dossier technique :
+    //      - /site_faj/index.php                 → racine = /site_faj
+    //      - /site_faj/pages/a-propos.php        → racine = /site_faj   (retirer /pages)
+    //      - /site_faj/admin/dashboard.php       → racine = /site_faj   (retirer /admin/…)
+    //      - /site_faj/admin/dons/liste.php      → racine = /site_faj   (retirer /admin/…)
+    //      - /site_faj/api/don.php               → racine = /site_faj   (retirer /api)
+    //    On part du dossier de SCRIPT_NAME puis on ampute les segments techniques
+    //    connus pour toujours retomber sur la racine du projet.
+    $subPath   = '';
     $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
     if ($scriptName !== '') {
-        $dir = rtrim(dirname($scriptName), '/');
-        // dirname('/index.php') === '/'  → on veut '' (racine)
-        $subPath = ($dir === '/' || $dir === '.') ? '' : $dir;
+        $dir = rtrim(dirname($scriptName), '/');       // ex. /site_faj/admin/dons
+        if ($dir === '/' || $dir === '.') {
+            $dir = '';
+        }
+        // Retire les dossiers techniques (et leurs sous-dossiers) situés sous la racine.
+        $dir = preg_replace('#/(pages|api)(/.*)?$#', '', $dir);
+        $dir = preg_replace('#/admin(/.*)?$#',        '', $dir);
+        $subPath = rtrim((string) $dir, '/');
     }
 
     // Repli : dérivation via DOCUMENT_ROOT si SCRIPT_NAME est indisponible.
