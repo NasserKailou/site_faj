@@ -97,6 +97,20 @@ Sous XAMPP, placez le projet dans `htdocs/site_faj/` et ouvrez
 mysql -u root -p < database.sql
 ```
 
+   **Appliquer les données officielles du FAJ** (recommandé — sur une base
+   existante `faj_niger`) :
+```bash
+mysql -u root -p faj_niger < patch_faj_officiel.sql
+```
+   > Ce patch est **idempotent** (réexécutable sans doublon) et applique les
+   > informations institutionnelles officielles (slogan, décret, coordonnées,
+   > Conseil d'Administration, 6 domaines + projets phares, clé de répartition).
+   > Conformément à la règle « ne rien supprimer sans remplacer », le contenu
+   > factice n'est pas effacé mais **désactivé** (masqué du site). Les éléments
+   > manquants restent marqués `TODO: à fournir par le FAJ` (logo, photos,
+   > montants). Peut aussi être importé via **phpMyAdmin** (onglet *Importer*,
+   > base `faj_niger` sélectionnée).
+
 3. **Configurer l'environnement via `.env`** (nouveau) :
 
    La configuration sensible (URL, base de données, clés de paiement, secrets)
