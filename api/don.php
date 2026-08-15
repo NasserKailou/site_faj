@@ -4,6 +4,9 @@
  * Sécurité : CSRF, rate limiting, validation complète, PCI-DSS
  */
 require_once '../includes/config.php';
+require_once '../includes/payment/bootstrap.php';
+
+use FAJ\Payment\PaymentFactory;
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -122,46 +125,58 @@ try {
 
     $don_id = (int)$pdo->lastInsertId();
 
-    // ─── Initialiser le paiement selon la méthode ────────────────────────────
-    $redirect_url = null;
+    // ─── Initialiser le paiement via l'abstraction PaymentGatewayInterface ────
+    // La passerelle est choisie selon la méthode (Mobile Money → CinetPay,
+    // carte → Stripe). Si aucune n'est configurée, la fabrique retombe
+    // automatiquement sur le mode démo (DisabledGateway).
+    $phone   = ($methode === 'orange_money') ? $om_phone : (($methode === 'moov_money') ? $mm_phone : $telephone);
+    $channel = match ($methode) {
+        'orange_money' => 'ORANGE_MONEY',
+        'moov_money'   => 'MOOV_MONEY',
+        default        => 'ALL',
+    };
 
-    switch ($methode) {
-        case 'orange_money':
-        case 'moov_money':
-            $phone        = ($methode === 'orange_money') ? $om_phone : $mm_phone;
-            $redirect_url = initCinetPay($don_id, $reference, $montant, $nom, $email, $methode, $phone);
-            break;
+    $gateway = PaymentFactory::forMethod($methode);
+    $result  = $gateway->initiatePayment([
+        'reference'   => $reference,
+        'amount'      => $montant,
+        'currency'    => defined('PAYMENT_CURRENCY') ? PAYMENT_CURRENCY : 'XOF',
+        'description' => 'Don FAJ Niger - ' . $reference,
+        'channel'     => $channel,
+        'customer'    => [
+            'name'    => $nom,
+            'email'   => $email,
+            'phone'   => $phone,
+            'country' => $pays,
+        ],
+        'metadata'    => ['don_id' => $don_id, 'projet_id' => $projet_id],
+    ]);
 
-        case 'carte_bancaire':
-            // En production : Stripe Checkout redirect
-            // Les données de carte sont gérées côté Stripe.js (jamais sur notre serveur)
-            $redirect_url = initStripeCheckout($don_id, $reference, $montant, $nom, $email);
-            break;
+    // Tracer la passerelle et le statut normalisé pour l'audit.
+    $pdo->prepare("UPDATE dons SET statut=?, updated_at=? WHERE id=?")
+        ->execute([$result->status, date('Y-m-d H:i:s'), $don_id]);
 
-        case 'paypal':
-            $redirect_url = initPayPal($don_id, $reference, $montant, $nom, $email);
-            break;
-    }
-
-    if ($redirect_url) {
+    if ($result->redirectUrl) {
         echo json_encode([
             'success'      => true,
             'reference'    => $reference,
             'montant'      => $montant,
-            'redirect_url' => $redirect_url,
+            'redirect_url' => $result->redirectUrl,
         ]);
-    } else {
-        // Mode démo / passerelle non configurée : simuler succès
-        // En production, toujours rediriger vers la passerelle
-        $pdo->prepare("UPDATE dons SET statut='demo', updated_at=? WHERE id=?")
-            ->execute([date('Y-m-d H:i:s'), $don_id]);
-
+    } elseif ($result->success) {
+        // Passerelle non configurée : mode démo (aucun débit réel).
         echo json_encode([
             'success'   => true,
             'reference' => $reference,
             'montant'   => $montant,
-            'message'   => 'Don enregistré (mode démo). Configurez les clés API pour activer les paiements réels.',
-            'demo'      => true,
+            'message'   => $result->message,
+            'demo'      => $result->status === 'demo',
+        ]);
+    } else {
+        echo json_encode([
+            'success'   => false,
+            'reference' => $reference,
+            'message'   => $result->message,
         ]);
     }
 
@@ -175,102 +190,3 @@ try {
             : 'Erreur lors du traitement. Veuillez réessayer.',
     ]);
 }
-
-// ════════════════════════════════════════════════════════════════════════════
-//  FONCTIONS D'INTÉGRATION PASSERELLES
-// ════════════════════════════════════════════════════════════════════════════
-
-/**
- * CinetPay – Orange Money / Moov Money Niger
- */
-function initCinetPay(int $don_id, string $ref, int $montant, string $nom, string $email, string $methode, string $phone): ?string {
-    if (CINETPAY_APIKEY === 'VOTRE_APIKEY_CINETPAY') return null;
-
-    $channels = ($methode === 'orange_money') ? 'ORANGE_MONEY' : 'MOOV_MONEY';
-
-    $data = [
-        'apikey'         => CINETPAY_APIKEY,
-        'site_id'        => CINETPAY_SITE_ID,
-        'transaction_id' => $ref,
-        'amount'         => $montant,
-        'currency'       => 'XOF',
-        'description'    => 'Don FAJ Niger – ' . $ref,
-        'notify_url'     => SITE_URL . '/api/webhook-cinetpay',
-        'return_url'     => SITE_URL . '/don-succes?ref=' . $ref,
-        'cancel_url'     => SITE_URL . '/don?annule=1',
-        'customer_name'  => $nom,
-        'customer_email' => $email,
-        'customer_phone_number' => $phone,
-        'channels'       => $channels,
-        'metadata'       => json_encode(['don_id' => $don_id]),
-    ];
-
-    $ch = curl_init(CINETPAY_BASE_URL);
-    curl_setopt_array($ch, [
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => json_encode($data),
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 30,
-        CURLOPT_SSL_VERIFYPEER => true,
-    ]);
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    $result = json_decode($response, true);
-    return $result['data']['payment_url'] ?? null;
-}
-
-/**
- * Stripe – Carte Visa / Mastercard
- * Note : Stripe Checkout redirige vers une page Stripe hébergée.
- * Les données de carte sont saisies directement chez Stripe (PCI-DSS Level 1).
- */
-function initStripeCheckout(int $don_id, string $ref, int $montant, string $nom, string $email): ?string {
-    if (STRIPE_SECRET_KEY === 'sk_test_VOTRE_CLE_SECRETE_STRIPE') return null;
-
-    $data = http_build_query([
-        'line_items[0][price_data][currency]'                        => 'xof',
-        'line_items[0][price_data][product_data][name]'              => 'Don FAJ Niger',
-        'line_items[0][price_data][product_data][description]'       => 'Fonds d\'Appui à la Justice – Réf : ' . $ref,
-        'line_items[0][price_data][unit_amount]'                     => $montant,
-        'line_items[0][quantity]'                                    => 1,
-        'mode'                                                       => 'payment',
-        'success_url'                                                => SITE_URL . '/don-succes?ref=' . $ref,
-        'cancel_url'                                                 => SITE_URL . '/don?annule=1',
-        'customer_email'                                             => $email,
-        'metadata[reference]'                                        => $ref,
-        'metadata[don_id]'                                           => $don_id,
-        'payment_method_types[0]'                                    => 'card',
-        'billing_address_collection'                                 => 'required',
-    ]);
-
-    $ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
-    curl_setopt_array($ch, [
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => $data,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_USERPWD        => STRIPE_SECRET_KEY . ':',
-        CURLOPT_TIMEOUT        => 30,
-        CURLOPT_SSL_VERIFYPEER => true,
-    ]);
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    $result = json_decode($response, true);
-    return $result['url'] ?? null;
-}
-
-/**
- * PayPal – Paiement international
- */
-function initPayPal(int $don_id, string $ref, int $montant, string $nom, string $email): ?string {
-    // Conversion XOF → EUR (approximatif : 1 EUR ≈ 656 XOF)
-    $montant_eur = round($montant / 656, 2);
-    if ($montant_eur < 0.01) return null;
-
-    // Utiliser l'API REST PayPal en production
-    // Pour l'instant, retourner null (mode démo)
-    return null;
-}
-?>

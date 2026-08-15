@@ -50,6 +50,8 @@ $routes = [
     '/api/don'                 => '/api/don.php',
     '/api/newsletter'          => '/api/newsletter.php',
     '/api/webhook-cinetpay'    => '/api/webhook-cinetpay.php',
+    '/api/webhook-stripe'      => '/api/webhook-stripe.php',
+    '/api/contact'             => '/api/contact.php',
 ];
 
 // Routes avec paramètres dynamiques
