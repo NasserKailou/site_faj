@@ -1,6 +1,7 @@
 <?php
 $page_title = 'Accueil';
 require_once 'includes/config.php';
+require_once 'includes/faj_data.php';
 
 // Récupérer les données
 try {
@@ -105,8 +106,8 @@ require_once 'includes/header.php';
                     <span class="hero-stat-label">Projets Actifs</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-number">8</span>
-                    <span class="hero-stat-label">Régions couvertes</span>
+                    <span class="hero-stat-number">6</span>
+                    <span class="hero-stat-label">Domaines prioritaires</span>
                 </div>
             </div>
         </div>
@@ -137,8 +138,8 @@ require_once 'includes/header.php';
             </div>
             <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
                 <div class="stat-icon"><i class="fas fa-balance-scale"></i></div>
-                <span class="stat-number" data-count="8">0</span>
-                <span class="stat-label">Régions Couvertes</span>
+                <span class="stat-number" data-count="6">0</span>
+                <span class="stat-label">Domaines Prioritaires</span>
             </div>
         </div>
     </div>
@@ -336,49 +337,84 @@ require_once 'includes/header.php';
     </div>
 </section>
 
+<!-- ===== DOMAINES D'INTERVENTION ===== -->
+<section class="domaines-section" id="domaines">
+    <div class="container">
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-list-check"></i> Nos Domaines</span>
+            <h2 class="section-title">6 Domaines d'Intervention <span>Prioritaires</span></h2>
+            <p class="section-subtitle">Le FAJ concentre son action sur six domaines clés pour moderniser la Justice et le système pénitentiaire du Niger.</p>
+        </div>
+
+        <div class="domaines-grid">
+            <?php foreach (fajDomaines() as $i => $d): ?>
+            <a href="<?= SITE_URL ?>/projets?cat=<?= urlencode($d['categorie']) ?>"
+               class="domaine-card" data-aos="fade-up" data-aos-delay="<?= ($i % 3) * 80 ?>"
+               style="--dcolor:<?= $d['color'] ?>;">
+                <div class="domaine-icon"><i class="<?= $d['icon'] ?>"></i></div>
+                <h3 class="domaine-title"><?= htmlspecialchars($d['titre'], ENT_QUOTES) ?></h3>
+                <p class="domaine-desc"><?= htmlspecialchars($d['desc'], ENT_QUOTES) ?></p>
+                <span class="domaine-link">En savoir plus <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- ===== VALEURS ===== -->
+<section class="valeurs-section">
+    <div class="container">
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-gem"></i> Nos Valeurs</span>
+            <h2 class="section-title">Ce qui nous <span>Guide</span></h2>
+        </div>
+        <div class="valeurs-grid">
+            <?php foreach (fajValeurs() as $i => $v): ?>
+            <div class="valeur-card" data-aos="zoom-in" data-aos-delay="<?= $i * 80 ?>">
+                <div class="valeur-icon"><i class="<?= $v['icon'] ?>"></i></div>
+                <h4 class="valeur-title"><?= htmlspecialchars($v['titre'], ENT_QUOTES) ?></h4>
+                <p class="valeur-desc"><?= htmlspecialchars($v['desc'], ENT_QUOTES) ?></p>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
 <!-- ===== PROJETS ===== -->
 <section class="projects-section" id="projets">
     <div class="container">
         <div class="section-header centered" data-aos="fade-up">
             <span class="section-tag"><i class="fas fa-project-diagram"></i> Nos Projets</span>
-            <h2 class="section-title">Projets que <span>Nous Finançons</span></h2>
-            <p class="section-subtitle">Découvrez nos programmes en cours pour améliorer le système judiciaire du Niger</p>
+            <h2 class="section-title">Nos Projets <span>Phares</span></h2>
+            <p class="section-subtitle">Les projets structurants portés par le FAJ pour moderniser la Justice et le système pénitentiaire du Niger.</p>
         </div>
         
         <div class="projects-grid">
             <?php if (empty($projets)): ?>
             <!-- Projets par défaut si BD vide -->
             <?php
+            // Projets phares officiels du FAJ (affichés si la BD est vide).
+            // Montants non communiqués (TODO: à fournir par le FAJ) → pas de
+            // barre de progression fictive.
             $projets_defaut = [
-                ['titre' => 'Construction et Équipement de Tribunaux', 'description_courte' => 'Financement de la construction et de l\'équipement des tribunaux dans les régions du Niger', 'categorie' => 'infrastructure', 'objectif_montant' => 150000000, 'montant_collecte' => 45000000, 'image' => 'hero-collecte.jpg'],
-                ['titre' => 'Formation des Acteurs Judiciaires', 'description_courte' => 'Renforcement des capacités des magistrats, avocats et auxiliaires de justice', 'categorie' => 'formation', 'objectif_montant' => 80000000, 'montant_collecte' => 20000000, 'image' => 'hero-croissance.jpg'],
-                ['titre' => 'Humanisation du Milieu Carcéral', 'description_courte' => 'Amélioration des conditions de détention et réinsertion sociale des détenus', 'categorie' => 'humanisation', 'objectif_montant' => 100000000, 'montant_collecte' => 35000000, 'image' => 'hero-billets.jpg'],
-                ['titre' => 'Accès à la Justice pour les Vulnérables', 'description_courte' => 'Aide juridictionnelle gratuite pour les personnes démunies', 'categorie' => 'acces_justice', 'objectif_montant' => 60000000, 'montant_collecte' => 18000000, 'image' => 'hero-collecte.jpg'],
-                ['titre' => 'Numérisation du Système Judiciaire', 'description_courte' => 'Modernisation et digitalisation des archives et procédures judiciaires', 'categorie' => 'numerisation', 'objectif_montant' => 120000000, 'montant_collecte' => 30000000, 'image' => 'hero-croissance.jpg'],
-                ['titre' => 'Aide aux Détenus en Attente de Jugement', 'description_courte' => 'Programme d\'assistance pour les personnes en détention préventive prolongée', 'categorie' => 'acces_justice', 'objectif_montant' => 40000000, 'montant_collecte' => 12000000, 'image' => 'hero-billets.jpg'],
+                ['titre' => 'Perspectives de Projets Pilotes (PPP-FAJ)', 'description_courte' => 'Programme de projets pilotes du FAJ pour amorcer la modernisation du secteur de la Justice.', 'categorie' => 'infrastructure', 'slug' => 'ppp-faj', 'icon' => 'fas fa-diagram-project'],
+                ['titre' => 'Modernisation de la Cour d\'État (Kotou)', 'description_courte' => 'Modernisation de la Cour d\'État du Niger, sur le site de Kotou.', 'categorie' => 'infrastructure', 'slug' => 'modernisation-cour-etat-kotou', 'icon' => 'fas fa-landmark'],
+                ['titre' => 'Projet Alkali — Cours d\'Appel', 'description_courte' => 'Réhabilitation et construction des Cours d\'Appel sur l\'ensemble du territoire national.', 'categorie' => 'infrastructure', 'slug' => 'projet-alkali-cours-appel', 'icon' => 'fas fa-scale-balanced'],
+                ['titre' => 'Modernisation du TGI Hors Classe de Niamey', 'description_courte' => 'Modernisation du Tribunal de Grande Instance Hors Classe de Niamey.', 'categorie' => 'infrastructure', 'slug' => 'modernisation-tgi-hors-classe-niamey', 'icon' => 'fas fa-gavel'],
+                ['titre' => 'Tribunaux d\'Arrondissements Communaux', 'description_courte' => 'Construction des Tribunaux d\'Arrondissements Communaux pour une Justice de proximité.', 'categorie' => 'acces_justice', 'slug' => 'tribunaux-arrondissements-communaux', 'icon' => 'fas fa-building-shield'],
             ];
-            foreach ($projets_defaut as $p): 
-                $pct = $p['objectif_montant'] > 0 ? min(100, round($p['montant_collecte']/$p['objectif_montant']*100)) : 0;
+            foreach ($projets_defaut as $p):
             ?>
-            <div class="project-card" data-aos="fade-up">
-                <div class="project-img">
-                    <img src="<?= SITE_URL ?>/assets/images/<?= $p['image'] ?>" alt="<?= $p['titre'] ?>">
+            <div class="project-card project-card--phare" data-aos="fade-up">
+                <div class="project-img project-img--icon">
+                    <i class="<?= $p['icon'] ?>"></i>
                     <span class="project-cat-badge"><?= ucfirst(str_replace('_', ' ', $p['categorie'])) ?></span>
                 </div>
                 <div class="project-body">
-                    <h3 class="project-title"><?= $p['titre'] ?></h3>
-                    <p class="project-desc"><?= $p['description_courte'] ?></p>
-                    <div class="project-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" data-width="<?= $pct ?>%" style="width: <?= $pct ?>%"></div>
-                        </div>
-                        <div class="progress-info">
-                            <span class="progress-percent"><?= $pct ?>% financé</span>
-                            <span class="progress-amount"><?= number_format($p['montant_collecte'], 0, ',', ' ') ?> / <?= number_format($p['objectif_montant'], 0, ',', ' ') ?> FCFA</span>
-                        </div>
-                    </div>
+                    <h3 class="project-title"><?= htmlspecialchars($p['titre'], ENT_QUOTES) ?></h3>
+                    <p class="project-desc"><?= htmlspecialchars($p['description_courte'], ENT_QUOTES) ?></p>
                     <div class="project-footer">
-                        <span class="project-meta"><i class="fas fa-target"></i> Objectif : <?= number_format($p['objectif_montant'], 0, ',', ' ') ?> FCFA</span>
+                        <span class="project-meta"><i class="fas fa-star"></i> Projet phare</span>
                         <a href="<?= SITE_URL ?>/don" class="btn btn-primary btn-sm">Soutenir <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
@@ -741,33 +777,40 @@ require_once 'includes/header.php';
     </div>
 </section>
 
-<!-- ===== PARTENAIRES ===== -->
-<section class="partners-section">
+<!-- ===== POURQUOI S'ENGAGER / PARTENAIRES ===== -->
+<section class="partners-section" id="partenaires">
     <div class="container">
         <div class="section-header centered" data-aos="fade-up">
             <span class="section-tag"><i class="fas fa-handshake"></i> Partenaires</span>
-            <h2 class="section-title">Nos <span>Partenaires</span></h2>
+            <h2 class="section-title">Pourquoi s'engager <span>avec le FAJ</span></h2>
+            <p class="section-subtitle">Rejoignez un cadre institutionnel solide au service d'une Justice moderne et accessible.</p>
         </div>
-        
+
+        <?php if (!empty($partenaires)): ?>
         <div class="partners-track">
-            <?php if (!empty($partenaires)): ?>
             <?php foreach ($partenaires as $p): ?>
             <div class="partner-item" data-aos="fade-up">
-                <img src="<?= UPLOADS_URL ?>/partenaires/<?= $p['logo'] ?>" alt="<?= $p['nom'] ?>">
+                <img src="<?= UPLOADS_URL ?>/partenaires/<?= htmlspecialchars($p['logo'], ENT_QUOTES) ?>" alt="<?= htmlspecialchars($p['nom'], ENT_QUOTES) ?>">
             </div>
             <?php endforeach; ?>
-            <?php else: ?>
-            <!-- Partenaires par défaut -->
-            <?php 
-            $partenaires_defaut = ['Ministère de la Justice', 'PNUD Niger', 'Union Européenne', 'Banque Mondiale', 'ONU Droits de l\'Homme'];
-            foreach ($partenaires_defaut as $p): ?>
-            <div class="partner-item" data-aos="fade-up">
-                <div style="background:var(--light); padding:15px 25px; border-radius:8px; font-weight:700; color:var(--primary); font-size:13px; text-align:center; min-width:150px;">
-                    <?= $p ?>
-                </div>
+        </div>
+        <?php endif; ?>
+
+        <div class="engager-grid">
+            <?php foreach (fajPourquoiSengager() as $i => $e): ?>
+            <div class="engager-card" data-aos="fade-up" data-aos-delay="<?= $i * 80 ?>">
+                <div class="engager-icon"><i class="<?= $e['icon'] ?>"></i></div>
+                <h4 class="engager-title"><?= htmlspecialchars($e['titre'], ENT_QUOTES) ?></h4>
+                <p class="engager-desc"><?= htmlspecialchars($e['desc'], ENT_QUOTES) ?></p>
             </div>
             <?php endforeach; ?>
-            <?php endif; ?>
+        </div>
+
+        <div class="engager-cta" data-aos="fade-up">
+            <h3>Devenez partenaire technique et financier du FAJ</h3>
+            <a href="<?= SITE_URL ?>/contact" class="btn btn-primary btn-lg">
+                <i class="fas fa-handshake"></i> Devenir partenaire
+            </a>
         </div>
     </div>
 </section>
