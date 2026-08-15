@@ -52,6 +52,7 @@ $routes = [
     '/api/webhook-cinetpay'    => '/api/webhook-cinetpay.php',
     '/api/webhook-stripe'      => '/api/webhook-stripe.php',
     '/api/contact'             => '/api/contact.php',
+    '/sitemap.xml'             => '/sitemap.php',
 ];
 
 // Routes avec paramètres dynamiques
