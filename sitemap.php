@@ -10,6 +10,8 @@ $base = rtrim(SITE_URL, '/');
 $urls = [
     ['/', '1.0', 'daily'],
     ['/a-propos', '0.8', 'monthly'],
+    ['/gouvernance', '0.7', 'monthly'],
+    ['/cadre-financier', '0.7', 'monthly'],
     ['/projets', '0.8', 'weekly'],
     ['/actualites', '0.7', 'weekly'],
     ['/equipe', '0.5', 'monthly'],

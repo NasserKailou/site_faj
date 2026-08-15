@@ -139,10 +139,21 @@ function isActive(string $path): string {
                             Accueil
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="<?= SITE_URL ?>/a-propos" class="nav-link <?= isActive('/a-propos') ?>">
-                            À Propos
+                    <li class="nav-item dropdown">
+                        <a href="<?= SITE_URL ?>/a-propos" class="nav-link <?= isActive('/a-propos') ?: (isActive('/gouvernance') ?: isActive('/cadre-financier')) ?>">
+                            À Propos <i class="fas fa-chevron-down fa-xs"></i>
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="<?= SITE_URL ?>/a-propos">
+                                <i class="fas fa-circle-info"></i> Présentation du FAJ
+                            </a></li>
+                            <li><a href="<?= SITE_URL ?>/gouvernance">
+                                <i class="fas fa-sitemap"></i> Gouvernance
+                            </a></li>
+                            <li><a href="<?= SITE_URL ?>/cadre-financier">
+                                <i class="fas fa-coins"></i> Cadre financier
+                            </a></li>
+                        </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a href="<?= SITE_URL ?>/projets" class="nav-link <?= isActive('/projets') ?>">

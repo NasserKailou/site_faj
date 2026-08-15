@@ -64,6 +64,8 @@ ServerSignature Off
     # ── 9. Routes pages publiques ─────────────────────────────────────────
     RewriteRule ^$                               index.php                           [L,QSA]
     RewriteRule ^a-propos/?$                     pages/a-propos.php                  [L,QSA]
+    RewriteRule ^gouvernance/?$                  pages/gouvernance.php               [L,QSA]
+    RewriteRule ^cadre-financier/?$              pages/cadre-financier.php           [L,QSA]
     RewriteRule ^projets/?$                      pages/projets.php                   [L,QSA]
     RewriteRule ^actualites/?$                   pages/actualites.php                [L,QSA]
     RewriteRule ^contact/?$                      pages/contact.php                   [L,QSA]
