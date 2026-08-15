@@ -85,7 +85,7 @@
     <div class="footer-bottom">
         <div class="container">
             <div class="footer-bottom-inner">
-                <p>&copy; <?= date('Y') ?> FAJ - Fonds d'Appui à la Justice du Niger. Tous droits réservés.</p>
+                <p>&copy; <?= date('Y') ?> FAJ - Fonds d'Appui à la Justice. Fonds d'État créé par le décret N°2023-113/PRN/MJ du 26 janvier 2023. Tous droits réservés.</p>
                 <div class="footer-bottom-links">
                     <a href="<?= SITE_URL ?>/mentions-legales">Mentions légales</a>
                     <a href="<?= SITE_URL ?>/politique-confidentialite">Confidentialité</a>
