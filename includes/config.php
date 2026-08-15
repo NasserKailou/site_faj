@@ -11,12 +11,56 @@
 // ─── Chargement de l'environnement (.env) ────────────────────────────────────
 require_once __DIR__ . '/env.php';
 
+/**
+ * Détecte automatiquement l'URL de base du site à partir de la requête HTTP.
+ * Utilisé lorsque SITE_URL n'est pas défini dans .env — ainsi le site
+ * fonctionne partout sans configuration : XAMPP (/site_faj), port dédié,
+ * sous-dossier ou domaine de production, en HTTP comme en HTTPS.
+ */
+function fajDetectBaseUrl(): string {
+    // 1) Schéma (gère les reverse-proxy via X-Forwarded-Proto)
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['SERVER_PORT'] ?? '') == 443)
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    $scheme = $https ? 'https' : 'http';
+
+    // 2) Hôte (+ port si non standard)
+    $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
+
+    // 3) Sous-dossier d'installation.
+    //    Comme toutes les requêtes passent par le front-controller situé à la
+    //    racine du projet (index.php / router.php), le dossier de SCRIPT_NAME
+    //    correspond exactement au sous-chemin d'installation :
+    //      - XAMPP  .../htdocs/site_faj/index.php  → SCRIPT_NAME = /site_faj/index.php → /site_faj
+    //      - racine .../htdocs/index.php           → SCRIPT_NAME = /index.php          → ''
+    //    Cette méthode est fiable partout (pas de dépendance à realpath()).
+    $subPath = '';
+    $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+    if ($scriptName !== '') {
+        $dir = rtrim(dirname($scriptName), '/');
+        // dirname('/index.php') === '/'  → on veut '' (racine)
+        $subPath = ($dir === '/' || $dir === '.') ? '' : $dir;
+    }
+
+    // Repli : dérivation via DOCUMENT_ROOT si SCRIPT_NAME est indisponible.
+    if ($subPath === '') {
+        $docRoot = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'] ?? '') ?: '');
+        $baseDir = str_replace('\\', '/', dirname(__DIR__)); // racine du projet
+        if ($docRoot !== '' && $baseDir !== $docRoot && strpos($baseDir, $docRoot) === 0) {
+            $subPath = rtrim(substr($baseDir, strlen($docRoot)), '/');
+        }
+    }
+
+    return $scheme . '://' . $host . $subPath;
+}
+
 // ─── Paramètres du site ──────────────────────────────────────────────────────
 // Coordonnées officielles du FAJ (source de vérité institutionnelle).
 define('SITE_NAME',    env('SITE_NAME', 'Fonds d\'Appui à la Justice'));
 define('SITE_ABBR',    env('SITE_ABBR', 'FAJ'));
 define('SITE_SLOGAN',  env('SITE_SLOGAN', 'Le FAJ, l\'assurance d\'une Justice moderne'));
-define('SITE_URL',     rtrim((string) env('SITE_URL', 'http://localhost:3000'), '/'));
+// SITE_URL : priorité au .env, sinon auto-détection depuis la requête.
+define('SITE_URL',     rtrim((string) env('SITE_URL', '') ?: fajDetectBaseUrl(), '/'));
 define('SITE_EMAIL',   env('SITE_EMAIL', 'contact@faj.ne'));
 define('SITE_PHONE',   env('SITE_PHONE', '00227 20 37 15 95 / 00227 96 13 28 15'));
 define('SITE_ADDRESS', env('SITE_ADDRESS', 'Niamey-Niger, Quartier Koira Kano, Rue KK 46, BP : 11240'));
