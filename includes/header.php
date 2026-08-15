@@ -42,6 +42,37 @@ function isActive(string $path): string {
     <!-- Swiper -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
+    <!-- Canonical + robots -->
+    <link rel="canonical" href="<?= SITE_URL . htmlspecialchars(strtok($_SERVER['REQUEST_URI'], '?'), ENT_QUOTES) ?>">
+    <meta name="robots" content="index, follow">
+
+    <!-- Données structurées schema.org : GovernmentOrganization -->
+    <script type="application/ld+json">
+    <?= json_encode([
+        '@context' => 'https://schema.org',
+        '@type'    => 'GovernmentOrganization',
+        'name'     => 'Fonds d\'Appui à la Justice',
+        'alternateName' => 'FAJ',
+        'slogan'   => 'Le FAJ, l\'assurance d\'une Justice moderne',
+        'url'      => SITE_URL,
+        'logo'     => SITE_URL . '/assets/images/logo-faj.png',
+        'email'    => 'contact@faj.ne',
+        'telephone'=> '00227 20 37 15 95',
+        'foundingDate' => '2023-01-26',
+        'parentOrganization' => [
+            '@type' => 'GovernmentOrganization',
+            'name'  => 'Ministère de la Justice et des Droits de l\'Homme — République du Niger',
+        ],
+        'address'  => [
+            '@type' => 'PostalAddress',
+            'streetAddress'   => 'Quartier Koira Kano, Rue KK 46, BP : 11240',
+            'addressLocality' => 'Niamey',
+            'addressCountry'  => 'NE',
+        ],
+        'areaServed' => ['@type' => 'Country', 'name' => 'Niger'],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+    </script>
+
     <!-- CSS principal -->
     <link rel="stylesheet" href="<?= SITE_URL ?>/assets/css/style.css">
 
@@ -108,10 +139,21 @@ function isActive(string $path): string {
                             Accueil
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="<?= SITE_URL ?>/a-propos" class="nav-link <?= isActive('/a-propos') ?>">
-                            À Propos
+                    <li class="nav-item dropdown">
+                        <a href="<?= SITE_URL ?>/a-propos" class="nav-link <?= isActive('/a-propos') ?: (isActive('/gouvernance') ?: isActive('/cadre-financier')) ?>">
+                            À Propos <i class="fas fa-chevron-down fa-xs"></i>
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="<?= SITE_URL ?>/a-propos">
+                                <i class="fas fa-circle-info"></i> Présentation du FAJ
+                            </a></li>
+                            <li><a href="<?= SITE_URL ?>/gouvernance">
+                                <i class="fas fa-sitemap"></i> Gouvernance
+                            </a></li>
+                            <li><a href="<?= SITE_URL ?>/cadre-financier">
+                                <i class="fas fa-coins"></i> Cadre financier
+                            </a></li>
+                        </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a href="<?= SITE_URL ?>/projets" class="nav-link <?= isActive('/projets') ?>">

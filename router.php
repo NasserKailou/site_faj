@@ -22,6 +22,8 @@ if ($path !== '' && file_exists(__DIR__ . $path)) {
 $routes = [
     // Pages principales
     '/a-propos'                => '/pages/a-propos.php',
+    '/gouvernance'             => '/pages/gouvernance.php',
+    '/cadre-financier'         => '/pages/cadre-financier.php',
     '/projets'                 => '/pages/projets.php',
     '/actualites'              => '/pages/actualites.php',
     '/contact'                 => '/pages/contact.php',
@@ -50,6 +52,9 @@ $routes = [
     '/api/don'                 => '/api/don.php',
     '/api/newsletter'          => '/api/newsletter.php',
     '/api/webhook-cinetpay'    => '/api/webhook-cinetpay.php',
+    '/api/webhook-stripe'      => '/api/webhook-stripe.php',
+    '/api/contact'             => '/api/contact.php',
+    '/sitemap.xml'             => '/sitemap.php',
 ];
 
 // Routes avec paramètres dynamiques

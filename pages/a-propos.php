@@ -1,6 +1,7 @@
 <?php
 $page_title = 'À Propos du FAJ';
 require_once '../includes/config.php';
+require_once '../includes/faj_data.php';
 
 try {
     $pdo = getDB();
@@ -60,20 +61,13 @@ require_once '../includes/header.php';
 <section style="background:var(--light); padding:90px 0;">
     <div class="container">
         <div class="section-header centered" data-aos="fade-up">
-            <span class="section-tag"><i class="fas fa-bullseye"></i> Objectifs</span>
-            <h2 class="section-title">Nos Axes <span>d'Intervention</span></h2>
+            <span class="section-tag"><i class="fas fa-bullseye"></i> Domaines</span>
+            <h2 class="section-title">6 Domaines d'Intervention <span>Prioritaires</span></h2>
         </div>
         
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:30px;">
             <?php
-            $axes = [
-                ['icon'=>'fas fa-building-columns','titre'=>'Infrastructures Judiciaires','desc'=>'Construction, réhabilitation et équipement des tribunaux, palais de justice et établissements pénitentiaires dans toutes les régions du Niger.','color'=>'#1B2A4A'],
-                ['icon'=>'fas fa-graduation-cap','titre'=>'Formation & Renforcement','desc'=>'Formation continue des magistrats, avocats, greffiers, huissiers et tous les acteurs du système judiciaire pour améliorer la qualité de la justice.','color'=>'#E8870A'],
-                ['icon'=>'fas fa-hands-helping','titre'=>'Accès à la Justice','desc'=>'Aide juridictionnelle gratuite pour les personnes démunies, les femmes victimes de violence et les groupes vulnérables.','color'=>'#28a745'],
-                ['icon'=>'fas fa-heart-pulse','titre'=>'Humanisation Carcérale','desc'=>'Amélioration des conditions de détention, accès aux soins médicaux et programmes de réinsertion sociale pour les détenus.','color'=>'#dc3545'],
-                ['icon'=>'fas fa-laptop-code','titre'=>'Numérisation','desc'=>'Modernisation digitale du système judiciaire : numérisation des archives, dématérialisation des procédures et développement de plateformes numériques.','color'=>'#17a2b8'],
-                ['icon'=>'fas fa-scale-balanced','titre'=>'Droits Humains','desc'=>'Promotion des droits humains, sensibilisation des citoyens et renforcement de l\'état de droit au Niger.','color'=>'#6f42c1'],
-            ];
+            $axes = fajDomaines();
             foreach ($axes as $i => $axe):
             ?>
             <div style="background:white; border-radius:var(--radius-lg); padding:35px; box-shadow:var(--shadow); transition:var(--transition);" 
@@ -159,12 +153,13 @@ require_once '../includes/header.php';
         </div>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:30px;">
             <?php
-            $equipe_defaut = [
-                ['nom'=>'M. Aboubacar MAHAMADOU','poste'=>'Président du Conseil d\'Administration','initiale'=>'A'],
-                ['nom'=>'Mme Fatouma IBRAHIM','poste'=>'Directrice Générale','initiale'=>'F'],
-                ['nom'=>'M. Moussa SANI','poste'=>'Directeur Financier','initiale'=>'M'],
-                ['nom'=>'Mme Aïcha OUMAROU','poste'=>'Responsable Programmes','initiale'=>'A'],
-            ];
+            // Composition officielle du Conseil d'Administration (5 membres).
+            // Noms individuels non communiqués → fonctions institutionnelles.
+            // TODO: photos/noms nominatifs à fournir par le FAJ.
+            $equipe_defaut = [];
+            foreach (fajConseilAdministration() as $membre) {
+                $equipe_defaut[] = ['nom' => $membre, 'poste' => 'Membre du Conseil d\'Administration', 'initiale' => 'FAJ'];
+            }
             foreach ($equipe_defaut as $m):
             ?>
             <div style="background:var(--light); border-radius:var(--radius-lg); overflow:hidden; text-align:center; padding-bottom:25px;" data-aos="fade-up">

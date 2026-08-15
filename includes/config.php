@@ -2,22 +2,83 @@
 /**
  * Configuration principale FAJ Niger - Version sécurisée
  * Sécurité : CSRF, XSS, SQLi, rate limiting, session sécurisée
+ *
+ * ⚠️ Les données SENSIBLES (identifiants BD, clés de paiement, SMTP, secrets)
+ *    sont désormais lues depuis le fichier .env (non versionné) via env().
+ *    Voir .env.example pour la liste complète des variables et docs/PAIEMENT.md.
  */
 
+// ─── Chargement de l'environnement (.env) ────────────────────────────────────
+require_once __DIR__ . '/env.php';
+
+/**
+ * Détecte automatiquement l'URL de base du site à partir de la requête HTTP.
+ * Utilisé lorsque SITE_URL n'est pas défini dans .env — ainsi le site
+ * fonctionne partout sans configuration : XAMPP (/site_faj), port dédié,
+ * sous-dossier ou domaine de production, en HTTP comme en HTTPS.
+ */
+function fajDetectBaseUrl(): string {
+    // 1) Schéma (gère les reverse-proxy via X-Forwarded-Proto)
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['SERVER_PORT'] ?? '') == 443)
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    $scheme = $https ? 'https' : 'http';
+
+    // 2) Hôte (+ port si non standard)
+    $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
+
+    // 3) Sous-dossier d'installation = chemin URL de la RACINE du projet.
+    //    Selon la page demandée, SCRIPT_NAME pointe soit vers le front-controller
+    //    à la racine, soit vers un script dans un sous-dossier technique :
+    //      - /site_faj/index.php                 → racine = /site_faj
+    //      - /site_faj/pages/a-propos.php        → racine = /site_faj   (retirer /pages)
+    //      - /site_faj/admin/dashboard.php       → racine = /site_faj   (retirer /admin/…)
+    //      - /site_faj/admin/dons/liste.php      → racine = /site_faj   (retirer /admin/…)
+    //      - /site_faj/api/don.php               → racine = /site_faj   (retirer /api)
+    //    On part du dossier de SCRIPT_NAME puis on ampute les segments techniques
+    //    connus pour toujours retomber sur la racine du projet.
+    $subPath   = '';
+    $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+    if ($scriptName !== '') {
+        $dir = rtrim(dirname($scriptName), '/');       // ex. /site_faj/admin/dons
+        if ($dir === '/' || $dir === '.') {
+            $dir = '';
+        }
+        // Retire les dossiers techniques (et leurs sous-dossiers) situés sous la racine.
+        $dir = preg_replace('#/(pages|api)(/.*)?$#', '', $dir);
+        $dir = preg_replace('#/admin(/.*)?$#',        '', $dir);
+        $subPath = rtrim((string) $dir, '/');
+    }
+
+    // Repli : dérivation via DOCUMENT_ROOT si SCRIPT_NAME est indisponible.
+    if ($subPath === '') {
+        $docRoot = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'] ?? '') ?: '');
+        $baseDir = str_replace('\\', '/', dirname(__DIR__)); // racine du projet
+        if ($docRoot !== '' && $baseDir !== $docRoot && strpos($baseDir, $docRoot) === 0) {
+            $subPath = rtrim(substr($baseDir, strlen($docRoot)), '/');
+        }
+    }
+
+    return $scheme . '://' . $host . $subPath;
+}
+
 // ─── Paramètres du site ──────────────────────────────────────────────────────
-define('SITE_NAME',    'Fonds d\'Appui à la Justice');
-define('SITE_ABBR',    'F.A.J');
-define('SITE_URL',     'http://localhost:8085/site_faj');
-define('SITE_EMAIL',   'contact@faj.ne');
-define('SITE_PHONE',   '+227 20 XX XX XX');
-define('SITE_ADDRESS', 'Niamey, Niger');
+// Coordonnées officielles du FAJ (source de vérité institutionnelle).
+define('SITE_NAME',    env('SITE_NAME', 'Fonds d\'Appui à la Justice'));
+define('SITE_ABBR',    env('SITE_ABBR', 'FAJ'));
+define('SITE_SLOGAN',  env('SITE_SLOGAN', 'Le FAJ, l\'assurance d\'une Justice moderne'));
+// SITE_URL : priorité au .env, sinon auto-détection depuis la requête.
+define('SITE_URL',     rtrim((string) env('SITE_URL', '') ?: fajDetectBaseUrl(), '/'));
+define('SITE_EMAIL',   env('SITE_EMAIL', 'contact@faj.ne'));
+define('SITE_PHONE',   env('SITE_PHONE', '00227 20 37 15 95 / 00227 96 13 28 15'));
+define('SITE_ADDRESS', env('SITE_ADDRESS', 'Niamey-Niger, Quartier Koira Kano, Rue KK 46, BP : 11240'));
 
 // ─── Base de données ─────────────────────────────────────────────────────────
-define('DB_HOST',    'localhost');
-define('DB_NAME',    'faj_niger');
-define('DB_USER',    'root');
-define('DB_PASS',    '');
-define('DB_CHARSET', 'utf8mb4');
+define('DB_HOST',    env('DB_HOST', 'localhost'));
+define('DB_NAME',    env('DB_NAME', 'faj_niger'));
+define('DB_USER',    env('DB_USER', 'root'));
+define('DB_PASS',    env('DB_PASS', ''));
+define('DB_CHARSET', env('DB_CHARSET', 'utf8mb4'));
 
 // ─── Chemins ─────────────────────────────────────────────────────────────────
 define('BASE_PATH',    dirname(__DIR__));
@@ -26,35 +87,44 @@ define('UPLOADS_PATH', BASE_PATH . '/uploads');
 define('UPLOADS_URL',  SITE_URL . '/uploads');
 
 // ─── Sécurité ────────────────────────────────────────────────────────────────
-define('ADMIN_SECRET',      'faj_admin_2024_secure_!@#$%');
-define('SESSION_TIMEOUT',   3600);          // 1 heure
+define('ADMIN_SECRET',      env('ADMIN_SECRET', 'faj_admin_change_me_in_env'));
+define('SESSION_TIMEOUT',   (int) env('SESSION_TIMEOUT', 3600));   // 1 heure
 define('CSRF_TOKEN_NAME',   'faj_csrf_token');
-define('MAX_LOGIN_ATTEMPTS', 5);
-define('LOCKOUT_TIME',      900);           // 15 min en secondes
-define('RATE_LIMIT_WINDOW', 60);            // Fenêtre 60 sec
-define('RATE_LIMIT_MAX',    30);            // 30 req / fenêtre
+define('MAX_LOGIN_ATTEMPTS', (int) env('MAX_LOGIN_ATTEMPTS', 5));
+define('LOCKOUT_TIME',      (int) env('LOCKOUT_TIME', 900));        // 15 min
+define('RATE_LIMIT_WINDOW', (int) env('RATE_LIMIT_WINDOW', 60));    // Fenêtre 60 sec
+define('RATE_LIMIT_MAX',    (int) env('RATE_LIMIT_MAX', 30));       // 30 req / fenêtre
 
-// ─── Clés de paiement (à remplacer par les vraies clés en production) ────────
-define('CINETPAY_APIKEY',   'VOTRE_APIKEY_CINETPAY');
-define('CINETPAY_SITE_ID',  'VOTRE_SITE_ID');
-define('CINETPAY_BASE_URL', 'https://api-checkout.cinetpay.com/v2/payment');
+// ─── Paiement (clé-en-main) ──────────────────────────────────────────────────
+// PAYMENT_MODE : sandbox | live | disabled  ·  PAYMENT_GATEWAY : cinetpay | stripe
+define('PAYMENT_MODE',    env('PAYMENT_MODE', 'sandbox'));
+define('PAYMENT_GATEWAY', env('PAYMENT_GATEWAY', ''));
+define('PAYMENT_CURRENCY', env('CURRENCY', 'XOF'));
 
-define('STRIPE_PUBLIC_KEY', 'pk_test_VOTRE_CLE_PUBLIQUE_STRIPE');
-define('STRIPE_SECRET_KEY', 'sk_test_VOTRE_CLE_SECRETE_STRIPE');
+// Rétro-compatibilité : constantes historiques alimentées depuis .env.
+define('CINETPAY_APIKEY',   env('CINETPAY_API_KEY', 'VOTRE_APIKEY_CINETPAY'));
+define('CINETPAY_SITE_ID',  env('CINETPAY_SITE_ID', 'VOTRE_SITE_ID'));
+define('CINETPAY_BASE_URL', env('CINETPAY_BASE_URL', 'https://api-checkout.cinetpay.com/v2/payment'));
 
-define('PAYDUNYA_MASTER_KEY',  'VOTRE_MASTER_KEY_PAYDUNYA');
-define('PAYDUNYA_PUBLIC_KEY',  'VOTRE_PUBLIC_KEY_PAYDUNYA');
-define('PAYDUNYA_PRIVATE_KEY', 'VOTRE_PRIVATE_KEY_PAYDUNYA');
-define('PAYDUNYA_TOKEN',       'VOTRE_TOKEN_PAYDUNYA');
+define('STRIPE_PUBLIC_KEY', env('STRIPE_PUBLIC_KEY', ''));
+define('STRIPE_SECRET_KEY', env('STRIPE_SECRET_KEY', ''));
 
 // ─── Email ───────────────────────────────────────────────────────────────────
-define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_PORT', 587);
-define('SMTP_USER', 'noreply@faj.ne');
-define('SMTP_PASS', 'votre_mot_de_passe');
+define('SMTP_HOST', env('SMTP_HOST', 'smtp.gmail.com'));
+define('SMTP_PORT', (int) env('SMTP_PORT', 587));
+define('SMTP_USER', env('SMTP_USER', 'noreply@faj.ne'));
+define('SMTP_PASS', env('SMTP_PASS', ''));
 
 // ─── Mode débogage ───────────────────────────────────────────────────────────
-define('DEBUG_MODE', false);
+define('DEBUG_MODE', (bool) env('DEBUG_MODE', false));
+
+// Cookies sécurisés : activés automatiquement en HTTPS ou via APP_ENV=production
+define('SESSION_COOKIE_SECURE', (bool) (
+    env('SESSION_COOKIE_SECURE', null) ??
+    ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+     ($_SERVER['SERVER_PORT'] ?? '') == 443 ||
+     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'))
+));
 
 // ─── Erreurs PHP ─────────────────────────────────────────────────────────────
 if (DEBUG_MODE) {
@@ -70,7 +140,7 @@ if (DEBUG_MODE) {
 // ─── Session sécurisée ───────────────────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly',  1);
-    ini_set('session.cookie_secure',    0);   // Mettre 1 en production HTTPS
+    ini_set('session.cookie_secure',    SESSION_COOKIE_SECURE ? 1 : 0); // Auto en HTTPS
     ini_set('session.cookie_samesite',  'Strict');
     ini_set('session.use_strict_mode',  1);
     ini_set('session.use_only_cookies', 1);
@@ -298,42 +368,42 @@ function initSQLiteDB(PDO $pdo): void {
     $pdo->exec("INSERT OR IGNORE INTO admins (nom, email, mot_de_passe, role) VALUES 
         ('Super Administrateur', 'admin@faj.ne', '\$2y\$12\$LjpqZHL7iq1U7SdycSbUXO7FwI4ATM3gWCp29eNJC9pLRrkSbJoQy', 'super_admin');");
 
+    // Paramètres institutionnels officiels (source de vérité FAJ).
     $params = [
         ['site_nom',          'Fonds d\'Appui à la Justice'],
-        ['site_slogan',       'Ensemble pour une Justice accessible à tous'],
-        ['site_description',  'Le FAJ collecte des fonds pour moderniser et améliorer le système judiciaire du Niger'],
+        ['site_slogan',       'Le FAJ, l\'assurance d\'une Justice moderne'],
+        ['site_description',  'Le Fonds d\'Appui à la Justice (FAJ) est un Fonds d\'État du Niger qui mobilise des ressources pour financer et soutenir les services judiciaires et pénitentiaires, ainsi que l\'assistance juridique et judiciaire.'],
         ['site_email',        'contact@faj.ne'],
-        ['site_telephone',    '+227 20 XX XX XX'],
-        ['site_adresse',      'Niamey, Niger'],
-        ['site_facebook',     'https://facebook.com/fajniger'],
-        ['site_twitter',      'https://twitter.com/fajniger'],
-        ['site_linkedin',     'https://linkedin.com/company/fajniger'],
+        ['site_telephone',    '00227 20 37 15 95 / 00227 96 13 28 15'],
+        ['site_adresse',      'Niamey-Niger, Quartier Koira Kano, Rue KK 46, BP : 11240'],
+        ['site_facebook',     ''],
+        ['site_twitter',      ''],
+        ['site_linkedin',     ''],
         ['site_youtube',      ''],
-        ['hero_titre',        'Votre don peut <span>changer des vies</span>'],
-        ['hero_sous_titre',   'Participez à la modernisation du système judiciaire du Niger. Ensemble, nous pouvons garantir une justice accessible, équitable et transparente pour tous.'],
-        ['a_propos_titre',    'Pour une Justice <span>Accessible à Tous</span>'],
-        ['a_propos_texte',    '<p>Le <strong>Fonds d\'Appui à la Justice (FAJ)</strong> est un mécanisme de financement innovant créé pour soutenir la modernisation et l\'amélioration du système judiciaire du Niger.</p><p>Notre mission est de mobiliser des ressources financières auprès de la société civile, des entreprises et des partenaires internationaux pour financer des projets structurants dans le domaine de la justice.</p>'],
+        ['hero_titre',        'Le FAJ, l\'assurance d\'une <span>Justice moderne</span>'],
+        ['hero_sous_titre',   'Fonds d\'État créé par le décret N°2023-113/PRN/MJ du 26 janvier 2023, le FAJ mobilise l\'investissement public et privé pour un meilleur accès à la Justice et la modernisation du système carcéral du Niger.'],
+        ['a_propos_titre',    'Promouvoir l\'investissement dans la <span>Justice</span>'],
+        ['a_propos_texte',    '<p>Le <strong>Fonds d\'Appui à la Justice (FAJ)</strong> est un Fonds d\'État doté de la personnalité morale et de l\'autonomie administrative et financière, créé par le décret N°2023-113/PRN/MJ du 26 janvier 2023.</p><p>Sa mission : promouvoir l\'investissement public et privé dans le domaine de la Justice, via la mobilisation de fonds destinés à financer et soutenir les services judiciaires et pénitentiaires, ainsi que l\'assistance juridique et judiciaire — pour un meilleur accès à la Justice et la modernisation du système carcéral.</p>'],
+        ['vision_2035',       'À l\'horizon 2035, un meilleur accès à la Justice pour tous, dans un système carcéral pleinement modernisé.'],
+        ['decret_creation',   'Décret N° 2023-113/PRN/MJ du 26 janvier 2023'],
+        ['ministere_tutelle', 'Ministère de la Justice et des Droits de l\'Homme — République du Niger'],
     ];
     $stmt = $pdo->prepare("INSERT OR IGNORE INTO parametres (cle, valeur) VALUES (?, ?)");
     foreach ($params as $p) $stmt->execute($p);
 
+    // Projets phares officiels du FAJ (montants : TODO à fournir par le FAJ).
     $projets = [
-        ['Construction et Équipement de Tribunaux', 'construction-equipement-tribunaux', 'Financement de la construction et équipement des tribunaux dans les régions du Niger', 'infrastructure', 150000000, 1],
-        ['Formation des Acteurs Judiciaires',       'formation-acteurs-judiciaires',       'Renforcement des capacités des magistrats, avocats et auxiliaires de justice',          'formation',      80000000,  2],
-        ['Humanisation du Milieu Carcéral',         'humanisation-milieu-carceral',         'Amélioration des conditions de détention et réinsertion sociale des détenus',            'humanisation',   100000000, 3],
-        ['Accès à la Justice pour les Vulnérables', 'acces-justice-vulnerables',            'Aide juridictionnelle gratuite pour les personnes démunies',                            'acces_justice',  60000000,  4],
-        ['Numérisation du Système Judiciaire',      'numerisation-systeme-judiciaire',      'Modernisation et digitalisation des archives et procédures judiciaires',                'numerisation',   120000000, 5],
+        ['Perspectives de Projets Pilotes (PPP-FAJ)', 'ppp-faj', 'Programme de projets pilotes du Fonds d\'Appui à la Justice pour amorcer la modernisation du secteur.', 'infrastructure', 0, 1],
+        ['Modernisation de la Cour d\'État (Kotou)', 'modernisation-cour-etat-kotou', 'Modernisation de la Cour d\'État du Niger (site de Kotou).', 'infrastructure', 0, 2],
+        ['Projet Alkali — Cours d\'Appel', 'projet-alkali-cours-appel', 'Réhabilitation et construction des Cours d\'Appel sur l\'ensemble du territoire national.', 'infrastructure', 0, 3],
+        ['Modernisation du TGI Hors Classe de Niamey', 'modernisation-tgi-hors-classe-niamey', 'Modernisation du Tribunal de Grande Instance Hors Classe de Niamey.', 'infrastructure', 0, 4],
+        ['Tribunaux d\'Arrondissements Communaux', 'tribunaux-arrondissements-communaux', 'Construction des Tribunaux d\'Arrondissements Communaux pour une Justice de proximité.', 'acces_justice', 0, 5],
     ];
     $ps = $pdo->prepare("INSERT OR IGNORE INTO projets (titre, slug, description_courte, categorie, objectif_montant, priorite) VALUES (?,?,?,?,?,?)");
     foreach ($projets as $p) $ps->execute($p);
 
-    $temoignages = [
-        ['Alhaji Moussa', 'Commerçant, Niamey',  'Grâce au FAJ, j\'ai pu avoir accès à l\'aide juridictionnelle. Une initiative vraiment importante pour nous.', 5],
-        ['Mme Mariama',   'Enseignante, Zinder',  'Le FAJ travaille pour que la justice ne soit plus un luxe réservé aux riches. Je soutiens cette cause.',        5],
-        ['Dr. Ibrahim',   'Médecin, Agadez',      'La modernisation du système judiciaire est essentielle pour le développement du Niger.',                         5],
-    ];
-    $ts = $pdo->prepare("INSERT OR IGNORE INTO temoignages (nom, poste, contenu, note) VALUES (?,?,?,?)");
-    foreach ($temoignages as $t) $ts->execute($t);
+    // Aucun témoignage officiel fourni : table laissée vide (ne pas inventer).
+    // TODO: à fournir par le FAJ.
 
     $stats = [
         ['total_donateurs',    0, 'Donateurs',     'fas fa-users'],
@@ -577,8 +647,32 @@ function setSecurityHeaders(): void {
     header("X-Frame-Options: SAMEORIGIN");
     header("X-XSS-Protection: 1; mode=block");
     header("Referrer-Policy: strict-origin-when-cross-origin");
-    header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
-    header("Content-Security-Policy: default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https: data:;");
+    header("Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(self)");
+
+    // CSP scoppée aux origines réellement utilisées (CDN + Stripe/CinetPay).
+    // 'unsafe-inline' reste nécessaire tant que le style/JS inline du thème
+    // n'est pas externalisé ; 'unsafe-eval' a été retiré (non requis).
+    $csp = implode('; ', [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "object-src 'none'",
+        "frame-ancestors 'self'",
+        "form-action 'self' https://api-checkout.cinetpay.com https://checkout.stripe.com",
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://js.stripe.com",
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com",
+        "font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com",
+        "img-src 'self' data: blob: https:",
+        "connect-src 'self' https://api.stripe.com https://api-checkout.cinetpay.com",
+        "frame-src https://js.stripe.com https://checkout.stripe.com https://api-checkout.cinetpay.com",
+    ]);
+    header("Content-Security-Policy: " . $csp);
+
+    // HSTS uniquement en HTTPS pour éviter de bloquer le dev en HTTP.
+    if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || ($_SERVER['SERVER_PORT'] ?? '') == 443
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')) {
+        header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
+    }
 }
 
 // Appliquer les headers dès le chargement

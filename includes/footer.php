@@ -30,6 +30,8 @@
                     <ul class="footer-links">
                         <li><a href="<?= SITE_URL ?>/"><i class="fas fa-chevron-right"></i> Accueil</a></li>
                         <li><a href="<?= SITE_URL ?>/a-propos"><i class="fas fa-chevron-right"></i> À Propos</a></li>
+                        <li><a href="<?= SITE_URL ?>/gouvernance"><i class="fas fa-chevron-right"></i> Gouvernance</a></li>
+                        <li><a href="<?= SITE_URL ?>/cadre-financier"><i class="fas fa-chevron-right"></i> Cadre financier</a></li>
                         <li><a href="<?= SITE_URL ?>/projets"><i class="fas fa-chevron-right"></i> Nos Projets</a></li>
                         <li><a href="<?= SITE_URL ?>/actualites"><i class="fas fa-chevron-right"></i> Actualités</a></li>
                         <li><a href="<?= SITE_URL ?>/equipe"><i class="fas fa-chevron-right"></i> Équipe</a></li>
@@ -85,7 +87,7 @@
     <div class="footer-bottom">
         <div class="container">
             <div class="footer-bottom-inner">
-                <p>&copy; <?= date('Y') ?> FAJ - Fonds d'Appui à la Justice du Niger. Tous droits réservés.</p>
+                <p>&copy; <?= date('Y') ?> FAJ - Fonds d'Appui à la Justice. Fonds d'État créé par le décret N°2023-113/PRN/MJ du 26 janvier 2023. Tous droits réservés.</p>
                 <div class="footer-bottom-links">
                     <a href="<?= SITE_URL ?>/mentions-legales">Mentions légales</a>
                     <a href="<?= SITE_URL ?>/politique-confidentialite">Confidentialité</a>
